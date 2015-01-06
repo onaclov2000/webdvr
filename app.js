@@ -22,24 +22,23 @@ var ipRef = myRootRef.push({
 });
 
 
-myRootRef.on('child_changed', function(childSnapshot, prevChildNa$
+myRootRef.on('child_changed', function(childSnapshot, prevChildName) {
    // code to handle child data changes.
    var data = childSnapshot.val();
    var localref = childSnapshot.ref();
-   console.log("new data");
-   console.log(data);
    if (data["commanded"] == "new") {
       console.log("New Schedule Added");
       var schedule = require('node-schedule');
-      var date = new Date(data["year"], data["month"], data["day"$
-
-      var j = schedule.scheduleJob(date, function(){
-                 console.log('The world is going to end today.');
-      });
+      var date = new Date(data["year"], data["month"], data["day"], data["hh"], data["mm"], 0);
+      console.log(date);
+      var j = schedule.scheduleJob(date, function(channel, program, length){
+                 console.log("Recording Channel " + channel + " and program " + program + " for " + length + "ms");
+      }.bind(null, data["channel"], data["program"], data["length"]));
 
       localref.update({"commanded" : "waiting"});
   }
 });
+
 
 /*
  * Shutting down stuff
