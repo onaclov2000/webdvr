@@ -33,6 +33,7 @@ myRootRef.on('child_changed', function(childSnapshot, prevChildName) {
       console.log(date);
       var j = schedule.scheduleJob(date, function(channel, program, length){
                  console.log("Recording Channel " + channel + " and program " + program + " for " + length + "ms");
+                 console.log(new Date());
       }.bind(null, data["channel"], data["program"], data["length"]));
 
       localref.update({"commanded" : "waiting"});
