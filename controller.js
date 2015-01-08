@@ -1,6 +1,7 @@
-app.controller("MyCtrl", ["$scope", "$firebase",
+angular.module('myApp', ['firebase'])
+.controller("MyCtrl", ["$scope", "$firebase",
   function($scope, $firebase) {
-    var ref = new Firebase(URL + '/dvr');
+    var ref = new Firebase('https://onaclovtech-home.firebaseio.com/dvr/');
     var sync = $firebase(ref);
 
     // if ref points to a data collection
