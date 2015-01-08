@@ -7,6 +7,10 @@
 </head>
 <body ng-controller="MyCtrl">
 
-{{list}}
+ <select ng-model="selectedStation" ng-options="item.station for item in list[3]"></select><br>
+{{selectedStation}}
+<br />
+<button ng-click='schedule()' ng-hide='addSchedule'>Schedule</button>
+<button ng-click='scheduled()' ng-hide='addSet'>Add</button>
 </body>
 </html>
