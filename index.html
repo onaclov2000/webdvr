@@ -1,10 +1,12 @@
-<html ng-app>
+<html ng-app="myApp">
 <head>
-<script src="https://cdn.firebase.com/js/client/2.0.4/firebase.js"></script>
-<script src="https://cdn.firebase.com/libs/angularfire/0.9.0/angularfire.min.js"></script>
+<script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.1.4/angular.min.js"></script>
+<script src="https://cdn.firebase.com/js/client/1.0.15/firebase.js"></script>
+<script src="https://cdn.firebase.com/libs/angularfire/0.8.0/angularfire.js"></script>
 <script src="controller.js"></script>
 </head>
-<body>
+<body ng-controller="MyCtrl">
 
+{{list}}
 </body>
 </html>
