@@ -6,11 +6,19 @@
 <script src="controller.js"></script>
 </head>
 <body ng-controller="MyCtrl">
+ <select ng-model="selectedStation" ng-options="item.station for item in rec['Station_List']"></select><br>
+<select ng-model="selectedTime" ng-options="time for time in times"></select>
+<select ng-model="selectedHalfHour" ng-options="value for (half_hour, value) in half_hours"></select>
+<select ng-model="selectedAmPm" ng-options="value for (am_pm, value) in am_pms"></select><br>
 
- <select ng-model="selectedStation" ng-options="item.station for item in list[3]"></select><br>
-{{selectedStation}}
 <br />
+<div ng-hide='addSet'>
+Recording: {{selectedStation.station}}
+At: {{selectedTime}}:{{selectedHalfHour}} {{selectedAmPm}}
+</div>
 <button ng-click='schedule()' ng-hide='addSchedule'>Schedule</button>
 <button ng-click='scheduled()' ng-hide='addSet'>Add</button>
+<br />
+DVR Status: {{list[5]["state"]}}
 </body>
 </html>
