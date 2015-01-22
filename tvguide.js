@@ -23,7 +23,9 @@ module.exports = {
                 str += chunk;
             });
             res.on('end', function() {
-                callback(str);
+                // When attempting to send to firebase still doesn't look right, without the parse it's a string (not JSON object)
+                // But as JSON object it returns to firebas "object, object..."...which is weird.
+                callback(JSON.parse(str));
             });
         });
     }
