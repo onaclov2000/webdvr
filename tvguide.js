@@ -4,8 +4,9 @@ var http = require("http");
 
 module.exports = {
         get: function(date, length) {
-                var length = 1440; // minutes in a day
-                var start = Math.floor((new Date).getTime() / 1000);;
+                //var length = 1440; // minutes in a day
+                //var start = Math.floor((new Date).getTime() / 1000);;
+                var start =
                 console.log(start);
                 var options = {
                     host: 'mobilelistings.tvguide.com',
