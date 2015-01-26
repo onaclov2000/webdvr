@@ -12,5 +12,5 @@ TODO LIST
 5. Store off recording history (for failure conditions)
 6. Implement Record Now (and start recording if no conflicts exist, rather than in the past)
 7. Enable Complete Series recording
-8. Enable New episodes recording
+8. Enable New episodes recording I'm thinking program ID lookup based, should we use tvguide, or another service?
 9. Replace boring text with pictures (a la netflix style)
