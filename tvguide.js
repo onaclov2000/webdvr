@@ -3,11 +3,9 @@ var http = require("http");
 
 
 module.exports = {
-    get: function(date, length) {
-        //var length = 1440; // minutes in a day
-        //var start = Math.floor((new Date).getTime() / 1000);;
+    get: function(date, length, callback) {
         var start = date;
-
+        console.log(start);
         var options = {
             host: 'mobilelistings.tvguide.com',
             port: 80,
@@ -15,16 +13,33 @@ module.exports = {
         };
 
         http.get(options, function(res) {
-            console.log("Got response: " + res.statusCode);
-            //console.log(res);
             var str = "";
             res.on('data', function(chunk) {
                 //console.log('BODY: ' + chunk);
                 str += chunk;
             });
             res.on('end', function() {
-                // When attempting to send to firebase still doesn't look right, without the parse it's a string (not JSON object)
-                // But as JSON object it returns to firebas "object, object..."...which is weird.
+                callback(JSON.parse(str));
+
+            });
+        });
+    },
+    program: function(id, callback) {
+        //          http://mapi.tvguide.com/listings/details?program=
+
+        var options = {
+            host: 'mapi.tvguide.com',
+            port: 80,
+            path: '/listings/details?program=' + id
+        };
+
+        http.get(options, function(res) {
+            var str = "";
+            res.on('data', function(chunk) {
+                //console.log('BODY: ' + chunk);
+                str += chunk;
+            });
+            res.on('end', function() {
                 callback(JSON.parse(str));
             });
         });
