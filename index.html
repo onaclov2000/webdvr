@@ -1,24 +1,18 @@
 <html ng-app="myApp">
-<head>
-<script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.1.4/angular.min.js"></script>
-<script src="https://cdn.firebase.com/js/client/1.0.15/firebase.js"></script>
-<script src="https://cdn.firebase.com/libs/angularfire/0.8.0/angularfire.js"></script>
-<script src="controller.js"></script>
-</head>
-<body ng-controller="MyCtrl">
- <select ng-model="selectedStation" ng-options="item.station for item in rec['Station_List']"></select><br>
-<select ng-model="selectedTime" ng-options="time for time in times"></select>
-<select ng-model="selectedHalfHour" ng-options="value for (half_hour, value) in half_hours"></select>
-<select ng-model="selectedAmPm" ng-options="value for (am_pm, value) in am_pms"></select><br>
 
-<br />
-<div ng-hide='addSet'>
-Recording: {{selectedStation.station}}
-At: {{selectedTime}}:{{selectedHalfHour}} {{selectedAmPm}}
-</div>
-<button ng-click='schedule()' ng-hide='addSchedule'>Schedule</button>
-<button ng-click='scheduled()' ng-hide='addSet'>Add</button>
-<br />
-DVR Status: {{list[5]["state"]}}
+<head>
+    <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.1.4/angular.min.js"></script>
+    <script src="https://cdn.firebase.com/js/client/1.0.15/firebase.js"></script>
+    <script src="https://cdn.firebase.com/libs/angularfire/0.8.0/angularfire.js"></script>
+    <script src="controller.js"></script>
+</head>
+
+<body ng-controller="MyCtrl">
+    <div ng-repeat="show in rec['tvguide']">
+        <ul ng-repeat="programs in show.ProgramSchedules">
+            <a href="#" ng-click="record(programs, show.Channel.Number)">{{programs.Title}} {{programs.StartTime}}<div ng-show="programs.AiringAttrib == 44">+--new</div></a>
+        </ul>
+    </div>
 </body>
+
 </html>
