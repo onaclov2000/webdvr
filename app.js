@@ -1,65 +1,71 @@
-var FB_URL = '';
+var FB_URL = require('./config').FB_URL;
 var Firebase = require('firebase');
 var os = require('os')
+var spawn = require('child_process').spawn;
+var schedule = require('node-schedule');
+var tvguide = require('./tvguide');
 var myRootRef = new Firebase(FB_URL);
+var dvr = require('./dvr')
 
-var interfaces = os.networkInterfaces();
-var addresses = [];
-for (k in interfaces) {
-    for (k2 in interfaces[k]) {
-        var address = interfaces[k][k2];
-        if (address.family == 'IPv4' && !address.internal) {
-            addresses.push(address.address)
-        }
-    }
-}
+dvr.initialize();
 
-// Push my IP to firebase
-// Perhaps a common "devices" location would be handy
-var ipRef = myRootRef.push({
-    "type": "local",
-    "ip": addresses[0]
+var rule = new schedule.RecurrenceRule();
+rule.hour = 23;
+rule.minute = 59;
+dvr.lookup_channel("2.1");
+var j = schedule.scheduleJob(rule, function() {
+    tvguide.get(Math.floor((new Date).getTime() / 1000), 1440, function(result) {
+        myRootRef.update({
+            "tvguide": result
+        });
+    });
 });
-
 
 myRootRef.on('child_changed', function(childSnapshot, prevChildName) {
-   // code to handle child data changes.
-   var data = childSnapshot.val();
-   var localref = childSnapshot.ref();
-   if (data["commanded"] == "new") {
-      console.log("New Schedule Added");
-      var schedule = require('node-schedule');
-      var date = new Date(data["year"], data["month"], data["day"], data["hh"], data["mm"], 0);
-      console.log(date);
-      var j = schedule.scheduleJob(date, function(channel, program, length){
-                 console.log("Recording Channel " + channel + " and program " + program + " for " + length + "ms");
-                 console.log(new Date());
-      }.bind(null, data["channel"], data["program"], data["length"]));
+    // code to handle child data changes.
+    var data = childSnapshot.val();
+    var localref = childSnapshot.ref();
+    if (data["commanded"] == "new") {
+        localref.update({
+            "commanded": "waiting"
+        });
+        console.log("New Schedule Added " + data["title"] + " @");
 
-      localref.update({"commanded" : "waiting"});
-  }
+        var date = new Date(data["year"], data["month"], data["day"], data["hh"], data["mm"], 0);
+        console.log(date);
+        var j = schedule.scheduleJob(date, function(ref, channel, length, title) {
+            var filename = title;
+            var info = dvr.lookup_channel(channel);
+
+            console.log(new Date());
+            ref.update({
+                "state": "recording"
+            });
+
+            console.log("title " + title + " for " + length + "seconds");
+            result = spawn('./record.sh', [filename, info[0], info[1], length]);
+
+            result.stdout.on('data', function(data) {
+                console.log(data);
+            });
+
+            result.on('close', function(code) {
+                r.update({
+                    "state": "waiting"
+                });
+            });
+
+        }.bind(null, localref, data["channel"], data["length"], data["title"]));
+    }
 });
 
-
-/*
- * Shutting down stuff
- */
-function onComplete(){
-   process.exit();
-}
-function delete_fb_entries (){
-   return function () {
-          ipRef.remove(onComplete);
-         }
-}
-
-//do something when app is closing
-process.on('exit', delete_fb_entries());
+// Do something when app is closing
+process.on('exit', dvr.cleanup());
 
 process.stdin.resume(); //so the program will not close instantly
 
 //catches ctrl+c event
-process.on('SIGINT', delete_fb_entries());
+process.on('SIGINT', dvr.cleanup());
 
 //catches uncaught exceptions
-process.on('uncaughtException', delete_fb_entries());
+process.on('uncaughtException', dvr.cleanup());
