@@ -3,8 +3,9 @@ var Firebase = require('firebase');
 var myRootRef = new Firebase(FB_URL);
 var os = require('os')
 var tvguide = require('./tvguide');
-
+var spawn = require('child_process').spawn;
 var ipRef = null;
+var lookup_channel_data = {};
 
 module.exports = {
     initialize: function() {
@@ -20,6 +21,22 @@ module.exports = {
         }
 
 
+
+
+        result = spawn('hdhomerun_config', ["103DA852", "scan", "/tuner0"]);
+        var current_program = null;
+
+
+        result.stdout.on('data', function(data) {
+            var channel = /us-bcast:(\d+)/.exec(data.toString());
+            if (channel != null) {
+                current_channel = channel[1];
+            }
+            var program = /PROGRAM (\d+): (\d+.\d+)(.*)/.exec(data.toString());
+            if (program != null) {
+                lookup_channel_data[program[2]] = [current_channel, program[1], program[3]];
+            }
+        });
         // Push my IP to firebase
         // Perhaps a common "devices" location would be handy
         // Need to consider if we have n dvr's load at this address
@@ -47,7 +64,11 @@ module.exports = {
         return function() {
             ipRef.remove(onComplete);
         }
+    },
+    lookup_channel: function(program) {
+        return lookup_channel_data[program];
     }
+
 }
 
 /*
