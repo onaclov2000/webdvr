@@ -27,13 +27,14 @@ Finally start the server on your host PC
 
 TODO LIST (Make suggestions or pull requests please!)
 ==========
-1. Manage Schedule Conflicts
-2. Optionally use second tuner
-3. Ensure Naming makes sense for all that is recorded.
-4. Upgrade to using HDHomerun nodejs package (currently using shell script with hdhomerun_config installed).
-5. Store off recording history (for failure conditions).
-6. Implement Record Now (and start recording if no conflicts exist, rather than in the past).
-7. Enable Complete Series recording.
-8. Enable New episodes recording I'm thinking program ID lookup based, should we use tvguide, or another service?
-9. Replace boring text with pictures (a la netflix style).
-10. Combine config.js and angularjs's firebase reference into one file, so you copy/paste the same file in two places.
+1. Update documentation Make things clearer, better directions.
+2. Manage Schedule Conflicts
+3. Optionally use second tuner
+4. Ensure Naming makes sense for all that is recorded.
+5. Upgrade to using HDHomerun nodejs package (currently using shell script with hdhomerun_config installed).
+6. Store off recording history (for failure conditions).
+7. Implement Record Now (and start recording if no conflicts exist, rather than in the past).
+8. Enable Complete Series recording.
+9. Enable New episodes recording I'm thinking program ID lookup based, should we use tvguide, or another service?
+10. Replace boring text with pictures (a la netflix style).
+11. Combine config.js and angularjs's firebase reference into one file, so you copy/paste the same file in two places.
