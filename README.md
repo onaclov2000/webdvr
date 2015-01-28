@@ -38,3 +38,4 @@ TODO LIST (Make suggestions or pull requests please!)
 9. Enable New episodes recording I'm thinking program ID lookup based, should we use tvguide, or another service?
 10. Replace boring text with pictures (a la netflix style).
 11. Combine config.js and angularjs's firebase reference into one file, so you copy/paste the same file in two places.
+12. Figure out "newness" of episode, I *think* AiringAttrib 44 means new, but there are others (I'm certain of that), not sure how to tell.
