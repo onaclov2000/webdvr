@@ -24,9 +24,9 @@ module.exports = {
             });
         });
     },
-    program: function(id, callback) {
+    get_name: function(id, callback) {
         //          http://mapi.tvguide.com/listings/details?program=
-
+        //         console.log(id);
         var options = {
             host: 'mapi.tvguide.com',
             port: 80,
@@ -40,7 +40,11 @@ module.exports = {
                 str += chunk;
             });
             res.on('end', function() {
-                callback(JSON.parse(str));
+                var result = JSON.parse(str);
+                //        console.log(result);
+                if (result["program"] != null) {
+                    callback("S" + result["program"]["season"] + ".E" + result["program"]["episode"] + "." + result["program"]["episode_title"].replace(/[^a-z0-9]/gi, '_').toLowerCase());
+                }
             });
         });
     }
