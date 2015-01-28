@@ -12,7 +12,6 @@ dvr.initialize();
 var rule = new schedule.RecurrenceRule();
 rule.hour = 23;
 rule.minute = 59;
-dvr.lookup_channel("2.1");
 var j = schedule.scheduleJob(rule, function() {
     tvguide.get(Math.floor((new Date).getTime() / 1000), 1440, function(result) {
         myRootRef.update({
@@ -33,29 +32,33 @@ myRootRef.on('child_changed', function(childSnapshot, prevChildName) {
 
         var date = new Date(data["year"], data["month"], data["day"], data["hh"], data["mm"], 0);
         console.log(date);
-        var j = schedule.scheduleJob(date, function(ref, channel, length, title) {
-            var filename = title;
-            var info = dvr.lookup_channel(channel);
+        tvguide.get_name(data["id"], function(result) {
+            console.log(result);
+        });
+        var j = schedule.scheduleJob(date, function(ref, channel, length, title, id) {
+            tvguide.get_name(id, function(result) {
+                var filename = result;
 
-            console.log(new Date());
-            ref.update({
-                "state": "recording"
-            });
+                var info = dvr.lookup_channel(channel);
+                console.log(new Date());
+                ref.update({
+                    "state": "recording"
+                });
 
-            console.log("title " + title + " for " + length + "seconds");
-            result = spawn('./record.sh', [filename, info[0], info[1], length]);
+                console.log("title " + title + " for " + length + "seconds");
+                result = spawn('./record.sh', [filename, info[0], info[1], length]);
 
-            result.stdout.on('data', function(data) {
-                console.log(data);
-            });
+                result.stdout.on('data', function(data) {
+                    console.log(data);
+                });
 
-            result.on('close', function(code) {
-                r.update({
-                    "state": "waiting"
+                result.on('close', function(code) {
+                    r.update({
+                        "state": "waiting"
+                    });
                 });
             });
-
-        }.bind(null, localref, data["channel"], data["length"], data["title"]));
+        }.bind(null, localref, data["channel"], data["length"], data["title"], data["id"]));
     }
 });
 
