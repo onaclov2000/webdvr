@@ -5,7 +5,7 @@ var http = require("http");
 module.exports = {
     get: function(date, length, callback) {
         var start = date;
-        console.log(start);
+        console.log("Retrieving Channel Data from TV Guide");
         var options = {
             host: 'mobilelistings.tvguide.com',
             port: 80,
@@ -41,9 +41,20 @@ module.exports = {
             });
             res.on('end', function() {
                 var result = JSON.parse(str);
-                //        console.log(result);
+                //          console.log("get_name: " + result);
                 if (result["program"] != null) {
-                    callback("S" + result["program"]["season"] + ".E" + result["program"]["episode"] + "." + result["program"]["episode_title"].replace(/[^a-z0-9]/gi, '_').toLowerCase());
+                    if (result["program"]["season"] != null && result["program"]["episode"] != null && result["program"]["episode_title"] != null) {
+
+                        callback("S" + result["program"]["season"] + ".E" + result["program"]["episode"] + "." + result["program"]["title"].replace(/[^a-z0-9]/gi, '_').toLowerCase() + "." + result["program"]["episode_title"].replace(/[^a-z0-9]/gi, '_').toLowerCase());
+                        return;
+                    }
+                    if (result["program"]["episode_title"] != null) {
+                        callback(result["program"]["episode_title"].replace(/[^a-z0-9]/gi, '_').toLowerCase());
+                        return;
+                    } else {
+                        callback(result["program"]["title"]);
+                        return;
+                    }
                 }
             });
         });
