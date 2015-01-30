@@ -6,8 +6,9 @@ var tvguide = require('./tvguide');
 var spawn = require('child_process').spawn;
 var ipRef = null;
 var lookup_channel_data = {};
-
+var current_channel = "";
 module.exports = {
+    //   lookup_data :
     initialize: function() {
         var interfaces = os.networkInterfaces();
         var addresses = [];
@@ -23,19 +24,36 @@ module.exports = {
 
 
 
+        console.log("Gathering Tuner Scan Results");
         result = spawn('hdhomerun_config', ["103DA852", "scan", "/tuner0"]);
-        var current_program = null;
 
 
+        var temp_data = "";
         result.stdout.on('data', function(data) {
-            var channel = /us-bcast:(\d+)/.exec(data.toString());
-            if (channel != null) {
-                current_channel = channel[1];
+            temp_data += data;
+            //   var channel = /us-bcast:(\d+)/.exec(data.toString());
+            //   if (channel != null){
+            //      console.log(channel[1]);
+            //   }
+        });
+        result.on('close', function(code) {
+            console.log("Parsing scan results");
+            var scan_results = temp_data.split("\n");
+            for (var i = 0; i < scan_results.length; ++i) {
+                var channel = /us-bcast:(\d+)/.exec(scan_results[i]);
+                if (channel != null) {
+                    current_channel = channel[1];
+                    //console.log(current_channel);
+                }
+                var program = /PROGRAM (\d+): (\d+.\d+)(.*)/.exec(scan_results[i]);
+                if (program != null) {
+                    lookup_channel_data[program[2]] = [current_channel, program[1], program[3]];
+                    //console.log(program[2]);
+                }
+
             }
-            var program = /PROGRAM (\d+): (\d+.\d+)(.*)/.exec(data.toString());
-            if (program != null) {
-                lookup_channel_data[program[2]] = [current_channel, program[1], program[3]];
-            }
+            console.log(lookup_channel_data);
+            console.log("done loading channel info");
         });
         // Push my IP to firebase
         // Perhaps a common "devices" location would be handy
@@ -50,12 +68,10 @@ module.exports = {
         // first time let's make sure we have a legit listing
         if (!myRootRef.tvguide) {
             tvguide.get(Math.floor((new Date).getTime() / 1000), 1440, function(result) {
-                console.log(result[0].Channel);
                 myRootRef.update({
                     "tvguide": result
                 });
             });
-
         }
 
 
@@ -66,6 +82,10 @@ module.exports = {
         }
     },
     lookup_channel: function(program) {
+        if (lookup_channel_data === null) {
+            console.log("Lookup Channel Data Not Setup");
+        }
+        //console.log("Lookup Data " + lookup_channel_data);
         return lookup_channel_data[program];
     }
 
