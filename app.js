@@ -38,7 +38,6 @@ myRootRef.on('child_changed', function(childSnapshot, prevChildName) {
         //          console.log("get_name result: " + result);
         //      });
         var j = schedule.scheduleJob(date, function(ref, channel, length, title, id) {
-            // console.log("id " + id);
             tvguide.get_name(id, function(result) {
                 var filename = result;
                 // console.log("channel" + channel);
