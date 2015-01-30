@@ -12,6 +12,7 @@ dvr.initialize();
 var rule = new schedule.RecurrenceRule();
 rule.hour = 23;
 rule.minute = 59;
+// Schedule an update of the fb data for midnight each day.
 var j = schedule.scheduleJob(rule, function() {
     tvguide.get(Math.floor((new Date).getTime() / 1000), 1440, function(result) {
         myRootRef.update({
