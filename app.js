@@ -62,7 +62,8 @@ myRootRef.on('child_changed', function(childSnapshot, prevChildName) {
                         "state": "waiting"
                     });
                 });
-            });
+            }); 
+        // Binding is a really handy way to keep data around that could change in the future
         }.bind(null, localref, data["program"], data["length"], data["title"], data["id"]));
     }
 });
