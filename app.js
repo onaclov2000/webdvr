@@ -44,9 +44,7 @@ myRootRef.on('child_changed', function(childSnapshot, prevChildName) {
                 ref.update({
                     "state": "recording"
                 });
-                //  console.log("filename " + filename);
-                //  console.log("info " + info);
-                //  console.log("length " + length);
+
                 console.log("Recording title " + title + " for " + length / 60 + "minutes");
                 record = spawn('./record.sh', [filename, info[0], info[1], length, 0]);
 
