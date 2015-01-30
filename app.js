@@ -7,6 +7,7 @@ var tvguide = require('./tvguide');
 var myRootRef = new Firebase(FB_URL);
 var dvr = require('./dvr')
 
+// Initialize the DVR, wait until the channels are all found first too.
 dvr.initialize();
 
 var rule = new schedule.RecurrenceRule();
