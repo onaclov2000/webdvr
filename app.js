@@ -38,7 +38,6 @@ myRootRef.on('child_changed', function(childSnapshot, prevChildName) {
         var j = schedule.scheduleJob(date, function(ref, channel, length, title, id) {
             tvguide.get_name(id, function(result) {
                 var filename = result;
-                // console.log("channel" + channel);
                 var info = dvr.lookup_channel(channel);
                 // console.log(new Date());
                 ref.update({
