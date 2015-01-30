@@ -22,6 +22,7 @@ var j = schedule.scheduleJob(rule, function() {
         });
     });
 });
+
 // Keep on top of changes with FB
 myRootRef.on('child_changed', function(childSnapshot, prevChildName) {
     // code to handle child data changes.
