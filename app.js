@@ -32,33 +32,37 @@ myRootRef.on('child_changed', function(childSnapshot, prevChildName) {
 
         var date = new Date(data["year"], data["month"], data["day"], data["hh"], data["mm"], 0);
         console.log(date);
-        tvguide.get_name(data["id"], function(result) {
-            console.log(result);
-        });
+        //      console.log("id " + data["id"]);
+        //      tvguide.get_name(data["id"], function(result) {
+        //          console.log("get_name result: " + result);
+        //      });
         var j = schedule.scheduleJob(date, function(ref, channel, length, title, id) {
+            // console.log("id " + id);
             tvguide.get_name(id, function(result) {
                 var filename = result;
-
+                // console.log("channel" + channel);
                 var info = dvr.lookup_channel(channel);
-                console.log(new Date());
+                // console.log(new Date());
                 ref.update({
                     "state": "recording"
                 });
+                //  console.log("filename " + filename);
+                //  console.log("info " + info);
+                //  console.log("length " + length);
+                console.log("Recording title " + title + " for " + length / 60 + "minutes");
+                record = spawn('./record.sh', [filename, info[0], info[1], length, 0]);
 
-                console.log("title " + title + " for " + length + "seconds");
-                result = spawn('./record.sh', [filename, info[0], info[1], length]);
-
-                result.stdout.on('data', function(data) {
-                    console.log(data);
+                record.stdout.on('data', function(data) {
+                    console.log(data.toString());
                 });
 
-                result.on('close', function(code) {
-                    r.update({
+                record.on('close', function(code) {
+                    ref.update({
                         "state": "waiting"
                     });
                 });
             });
-        }.bind(null, localref, data["channel"], data["length"], data["title"], data["id"]));
+        }.bind(null, localref, data["program"], data["length"], data["title"], data["id"]));
     }
 });
 
