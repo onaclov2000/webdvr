@@ -7,14 +7,11 @@ var tvguide = require('./tvguide');
 var myRootRef = new Firebase(FB_URL);
 var dvr = require('./dvr')
 
-
-// Initialize the DVR, wait until the channels are all found first too.
 dvr.initialize();
 
 var rule = new schedule.RecurrenceRule();
 rule.hour = 23;
 rule.minute = 59;
-// Schedule an update of the fb data for midnight each day.
 var j = schedule.scheduleJob(rule, function() {
     tvguide.get(Math.floor((new Date).getTime() / 1000), 1440, function(result) {
         myRootRef.update({
@@ -23,7 +20,9 @@ var j = schedule.scheduleJob(rule, function() {
     });
 });
 
-// Keep on top of changes with FB
+// add loop to schedule when starting up.
+
+// When we see that a commanded record has taken place we should do something about it
 myRootRef.on('child_changed', function(childSnapshot, prevChildName) {
     // code to handle child data changes.
     var data = childSnapshot.val();
@@ -32,34 +31,13 @@ myRootRef.on('child_changed', function(childSnapshot, prevChildName) {
         localref.update({
             "commanded": "waiting"
         });
-        console.log("New Schedule Added " + data["title"] + " @");
-
         var date = new Date(data["year"], data["month"], data["day"], data["hh"], data["mm"], 0);
+
+        console.log("New Schedule Added " + data["title"] + " @");
         console.log(date);
-        var j = schedule.scheduleJob(date, function(ref, channel, length, title, id) {
-            tvguide.get_name(id, function(result) {
-                var filename = result;
-                var info = dvr.lookup_channel(channel);
-                // console.log(new Date());
-                ref.update({
-                    "state": "recording"
-                });
 
-                console.log("Recording title " + title + " for " + length / 60 + "minutes");
-                record = spawn('./record.sh', [filename, info[0], info[1], length, 0]);
+        dvr.schedule(date, localref, data["program"], data["length"], data["title"], data["id"]);
 
-                record.stdout.on('data', function(data) {
-                    console.log(data.toString());
-                });
-
-                record.on('close', function(code) {
-                    ref.update({
-                        "state": "waiting"
-                    });
-                });
-            }); 
-        // Binding is a really handy way to keep data around that could change in the future
-        }.bind(null, localref, data["program"], data["length"], data["title"], data["id"]));
     }
 });
 
