@@ -21,7 +21,8 @@ angular.module('myApp', ['firebase'])
                 // this should send the good stuff
                 sync.$update("status", {
                     commanded: 'new',
-                    program: parent,
+                    // Firebase Workaround for not allowed to have .'s in paths
+                    program: parent.replace('.', '-'),
                     day: scheduledDate.getDate(),
                     month: scheduledDate.getMonth(),
                     year: scheduledDate.getFullYear(),
