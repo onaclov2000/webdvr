@@ -7,14 +7,11 @@ var tvguide = require('./tvguide');
 var myRootRef = new Firebase(FB_URL);
 var dvr = require('./dvr')
 
-
-// Initialize the DVR, wait until the channels are all found first too.
 dvr.initialize();
 
 var rule = new schedule.RecurrenceRule();
 rule.hour = 23;
 rule.minute = 59;
-// Schedule an update of the fb data for midnight each day.
 var j = schedule.scheduleJob(rule, function() {
     tvguide.get(Math.floor((new Date).getTime() / 1000), 1440, function(result) {
         myRootRef.update({
@@ -23,7 +20,44 @@ var j = schedule.scheduleJob(rule, function() {
     });
 });
 
-// Keep on top of changes with FB
+myRootRef.child("jobs").once('value', function(childSnapshot) {
+     if (childSnapshot.val() != null){
+        // console.log("YAY we have data");
+        // console.log(childSnapshot.val());
+         for (var key in childSnapshot.val()){
+          // console.log(key);
+           var x = childSnapshot.val()[key];
+          // console.log(x);
+           if (myRootRef != null){
+              console.log(new Date(x["date"]));
+              var Today = new Date().getTime();
+              var schedule = new Date(x["date"]).getTime();
+            //  console.log(Today);
+             // console.log(schedule);
+              if (schedule + (x["length"] * 1000) > Today){
+//                 console.log(new Date(x["date"]));
+  //               console.log(x["channel"]);
+    //             console.log(x["length"]);
+      //           console.log(x["title"]);
+                 dvr.schedule(new Date(x["date"]), myRootRef, x["channel"], x["length"], x["title"], x["id"]);
+              }
+              else{
+                 myRootRef.child("jobs").child(key).remove();
+                 console.log("old Show");
+              }
+
+           }
+           else{
+              console.log("Ref is null");
+          }
+        }
+     }
+     else{
+       console.log(childSnapshot.val());
+     }
+     
+});
+
 myRootRef.on('child_changed', function(childSnapshot, prevChildName) {
     // code to handle child data changes.
     var data = childSnapshot.val();
@@ -32,34 +66,15 @@ myRootRef.on('child_changed', function(childSnapshot, prevChildName) {
         localref.update({
             "commanded": "waiting"
         });
-        console.log("New Schedule Added " + data["title"] + " @");
-
         var date = new Date(data["year"], data["month"], data["day"], data["hh"], data["mm"], 0);
+
+        console.log("New Schedule Added " + data["title"] + " @");
         console.log(date);
-        var j = schedule.scheduleJob(date, function(ref, channel, length, title, id) {
-            tvguide.get_name(id, function(result) {
-                var filename = result;
-                var info = dvr.lookup_channel(channel);
-                // console.log(new Date());
-                ref.update({
-                    "state": "recording"
-                });
+        // queue in this case means we need to make sure we keep track of all our recordings
+        // I'm open to new names but this will be sufficient for now
+        dvr.queue(date, data["program"], data["length"], data["title"], data["id"]);
+        dvr.schedule(date, localref, data["program"], data["length"], data["title"], data["id"]);
 
-                console.log("Recording title " + title + " for " + length / 60 + "minutes");
-                record = spawn('./record.sh', [filename, info[0], info[1], length, 0]);
-
-                record.stdout.on('data', function(data) {
-                    console.log(data.toString());
-                });
-
-                record.on('close', function(code) {
-                    ref.update({
-                        "state": "waiting"
-                    });
-                });
-            }); 
-        // Binding is a really handy way to keep data around that could change in the future
-        }.bind(null, localref, data["program"], data["length"], data["title"], data["id"]));
     }
 });
 
