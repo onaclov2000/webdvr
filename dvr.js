@@ -56,8 +56,8 @@ module.exports = {
                         }
 
                     }
-  //                  console.log(lookup_channel_data);
-                    aRef.update({
+//                  console.log(lookup_channel_data);
+                   aRef.update({
                         channel_data: lookup_channel_data
                     });
                     console.log("done loading channel info");
@@ -90,7 +90,7 @@ module.exports = {
 
         console.log("Done");
     },
-    tuner: function(date, duration) {
+    tuner: function(date, duration){
          var return_val = -1;
          if (myRootRef.child("scheduled") != null)  {
 //            for (var key in myRootRef.child("scheduled").val()){            
@@ -133,7 +133,6 @@ module.exports = {
                 });
             });
         }.bind(null, ref_val, channel_val, length_val, title_val, id_val, tuner_index));
-       // console.log(j);
     },
     cleanup: function() {
         return function() {

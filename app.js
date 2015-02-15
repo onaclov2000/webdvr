@@ -58,6 +58,9 @@ myRootRef.child("jobs").once('value', function(childSnapshot) {
      
 });
 
+// add loop to schedule when starting up.
+
+// When we see that a commanded record has taken place we should do something about it
 myRootRef.on('child_changed', function(childSnapshot, prevChildName) {
     // code to handle child data changes.
     var data = childSnapshot.val();

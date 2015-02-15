@@ -24,10 +24,8 @@ module.exports = {
             });
         });
     },
-
     //        http://mobilelistings.tvguide.com/Listingsweb/ws/rest/airings/20385.268435456/start/1422793800/duration/20160/search?search=Big%20Bang%20Theory&formattype=json
     search: function(program_name, callback) {
-        //        http://mobilelistings.tvguide.com/Listingsweb/ws/rest/airings/20385.268435456/start/1422793800/duration/20160/search?search$
         var options = {
             host: 'mobilelistings.tvguide.com',
             port: 80,
@@ -67,7 +65,6 @@ module.exports = {
                 //          console.log("get_name: " + result);
                 if (result["program"] != null) {
                     if (result["program"]["season"] != null && result["program"]["episode"] != null && result["program"]["episode_title"] != null) {
-
                         callback(sanitize("S" + result["program"]["season"] + ".E" + result["program"]["episode"] + "." + result["program"]["title"] + "." + result["program"]["episode_title"]).replace(/ /g, "_"));
                         return;
                     }
