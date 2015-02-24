@@ -5,25 +5,42 @@ Web based DVR scheduling for HDHomerun using Raspberry Pi, NodeJS and Firebase.
 
 How it works
 =============
-Place controller.js and index.html into your web hosting location.
+Start with:
+
+    git clone https://github.com/onaclov2000/webdvr.git
+
+Next:
 
 You'll have to choose a firebase reference, I picked a project and used /dvr as the endpoint.
 
+Next: 
 Make sure to update controller.js to contain a path to your firebase reference.
 
-Place app.js, dvr.js, and tvguide.js into a folder on your host computer (I use a raspberry pi, although you can use your desktop, where node is ran from is largely irrelevant, except it MUST be on a lan/cat5/etc connection not wifi, it drops too many packets).
+Place controller.js and index.html into your web hosting location.
+
+Next:
 
 Update config.js to point to the same firebase reference as your angularjs app.
 
+Next: 
+
 Ensure you install the HDHomerun command line tools. 
+
+Next:
+Run the command otherwise it won't work
+
+    chmod +x record.sh
 
 Update record.sh to point to your particular Tuner (just update the name), as well as where you want recordings to land.
 
-You'll need to npm install some stuff, in particular, firebase and node-schedule.
+Run the following:
+    npm install
 
 Finally start the server on your host PC
 
     node app.js
+
+At that point things are ready.
 
 TODO LIST (Make suggestions or pull requests please!)
 ==========

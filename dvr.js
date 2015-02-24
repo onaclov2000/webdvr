@@ -26,12 +26,7 @@ module.exports = {
 
 
         myRootRef.child("channel_data").once('value', function(childSnapshot) {
-//            console.log(childSnapshot.val());
             var aRef = new Firebase(FB_URL);
-//            console.log(aRef.toString());
-
-            //   aRef.update({channel_data : lookup_channel_data});
-
 
             if (childSnapshot.val() === null) {
                 console.log("Gathering Tuner Scan Results");
@@ -47,16 +42,13 @@ module.exports = {
                         var channel = /us-bcast:(\d+)/.exec(scan_results[i]);
                         if (channel != null) {
                             current_channel = channel[1];
-                            //console.log(current_channel);
                         }
                         var program = /PROGRAM (\d+): (\d+.\d+)(.*)/.exec(scan_results[i]);
                         if (program != null) {
                             lookup_channel_data[program[2].replace('.', '-')] = [current_channel, program[1], program[3]];
-                            //console.log(program[2]);
                         }
 
                     }
-//                  console.log(lookup_channel_data);
                    aRef.update({
                         channel_data: lookup_channel_data
                     });
@@ -101,10 +93,11 @@ module.exports = {
     schedule: function(date, ref_val, channel_val, length_val, title_val, id_val) {
         var self = this
         var tuner_index = self.tuner(date, length_val);
-    //    console.log(date);
-
+        console.log(channel_val);
+        console.log(length_val);
+        console.log(title_val);
+        console.log(id_val);
         if (myRootRef != null){
-      //     console.log(date.getTime());
            myRootRef.child("scheduled").push({"date" : date.getTime(), "channel" : channel_val, "length" : length_val, "title" : title_val, "tuner" : tuner_index});
         }
         else{
