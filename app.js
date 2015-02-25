@@ -13,39 +13,38 @@ var rule = new schedule.RecurrenceRule();
 rule.hour = 23;
 rule.minute = 59;
 var j = schedule.scheduleJob(rule, function() {
-    tvguide.get(Math.floor((new Date).getTime() / 1000), 1440, function(result) {
+    // I picked 25 hours as my rotation, this way I get enough coverage each night at midnight, to cover into the next morning a hair.
+    tvguide.get(Math.floor((new Date).getTime() / 1000), 1500, function(result) {
         myRootRef.update({
             "tvguide": result
         });
+        // I'm thinking here we queue a list of series.
+        // And possibly schedule it
+        data = tvguide.shows(result);
+        for (item in data){
+           var date = new Date(data["year"], data["month"], data["day"], data["hh"], data["mm"], 0);
+           dvr.queue(date, data["program"], data["length"], data["title"], data["id"]);
+           dvr.schedule(date, localref, data["program"], data["length"], data["title"], data["id"]);
+        }
     });
 });
 
 myRootRef.child("jobs").once('value', function(childSnapshot) {
      if (childSnapshot.val() != null){
-        // console.log("YAY we have data");
-        // console.log(childSnapshot.val());
          for (var key in childSnapshot.val()){
-          // console.log(key);
            var x = childSnapshot.val()[key];
-          // console.log(x);
            if (myRootRef != null){
+              console.log("Jobs");
               console.log(new Date(x["date"]));
               var Today = new Date().getTime();
               var schedule = new Date(x["date"]).getTime();
-            //  console.log(Today);
-             // console.log(schedule);
               if (schedule + (x["length"] * 1000) > Today){
-//                 console.log(new Date(x["date"]));
-  //               console.log(x["channel"]);
-    //             console.log(x["length"]);
-      //           console.log(x["title"]);
                  dvr.schedule(new Date(x["date"]), myRootRef, x["channel"], x["length"], x["title"], x["id"]);
               }
               else{
                  myRootRef.child("jobs").child(key).remove();
                  console.log("old Show");
               }
-
            }
            else{
               console.log("Ref is null");
@@ -53,7 +52,7 @@ myRootRef.child("jobs").once('value', function(childSnapshot) {
         }
      }
      else{
-       console.log(childSnapshot.val());
+       console.log("No Outstanding Jobs Left To Schedule");
      }
      
 });
@@ -90,4 +89,7 @@ process.stdin.resume(); //so the program will not close instantly
 process.on('SIGINT', dvr.cleanup());
 
 //catches uncaught exceptions
-process.on('uncaughtException', dvr.cleanup());
+//process.on('uncaughtException', dvr.cleanup_error(err));
+process.on('uncaughtException', function(err) {
+  console.error(err.stack);
+});

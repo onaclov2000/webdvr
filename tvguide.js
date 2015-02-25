@@ -23,40 +23,41 @@ module.exports = {
             });
         });
     },
-    shows: function(entire_listing, show) {
-        var res = {};
+    shows: function(entire_listing, show, callback) {
+        var res = [];
         console.log(entire_listing);
-        for (keys in entire_listing){
+        for (key in entire_listing){
            // grab the index.
-           console.log(entire_listing[keys]["ProgramSchedules"]);
-           for (items in entire_listing[keys]["ProgramSchedules"]){  
-               console.log(items);      
-               console.log(keys);     
-               cosole.log(entire_listing[keys]);
-                /*
-                if (entire_listing[keys]["ProgramSchedules"][items]["Title"].indexOf(show) > -1){
-		        startTime = entire_listing[keys]["ProgramSchedules"][items]["StartTime"];
-		        endTime = entire_listing[keys]["ProgramSchedules"][items]["EndTime"];
+           //console.log(entire_listing[key]["ProgramSchedules"]);
+           for (item in entire_listing[key]["ProgramSchedules"]){  
+               //console.log(item);      
+               //console.log(key);     
+               //console.log(entire_listing[key]["ProgramSchedules"][item]);
+                
+                if (entire_listing[key]["ProgramSchedules"][item]["Title"].indexOf(show) > -1){
+		        startTime = entire_listing[key]["ProgramSchedules"][item]["StartTime"];
+		        endTime = entire_listing[key]["ProgramSchedules"][item]["EndTime"];
 		        var scheduledDate = new Date((startTime - 120) * 1000);
+                        console.log(scheduledDate);
 		        // always record 2 minutes before and 2 minutes after approx
 		        var duration = (endTime - startTime) + 240;
 		        res.push({
 		            // Firebase Workaround for not allowed to have .'s in paths
-		            program: entire_listing[keys]["Channel"]["Number"].replace('.', '-'),
+		            program: entire_listing[key]["Channel"]["Number"].replace('.', '-'),
 		            day: scheduledDate.getDate(),
 		            month: scheduledDate.getMonth(),
 		            year: scheduledDate.getFullYear(),
 		            hh: scheduledDate.getHours(),
 		            mm: scheduledDate.getMinutes(),
 		            length: duration,
-		            id: entire_listing[keys]["ProgramSchedules"][items]["ProgramId"],
-		            title: entire_listing[keys]["ProgramSchedules"][items]["Title"]
+		            id: entire_listing[key]["ProgramSchedules"][item]["ProgramId"],
+		            title: entire_listing[key]["ProgramSchedules"][item]["Title"]
 		        });
-                }*/
+                }
            }
         } 
 //        console.log(res);
-        return res;
+        callback(res);
     },
 
     //        http://mobilelistings.tvguide.com/Listingsweb/ws/rest/airings/20385.268435456/start/1422793800/duration/20160/search?search=Big%20Bang%20Theory&formattype=json

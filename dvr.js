@@ -12,6 +12,7 @@ var current_channel = "";
 module.exports = {
     //   lookup_data : 
     initialize: function() {
+        var self = this
         var interfaces = os.networkInterfaces();
         var addresses = [];
         for (k in interfaces) {
@@ -22,8 +23,6 @@ module.exports = {
                 }
             }
         }
-
-
 
         myRootRef.child("channel_data").once('value', function(childSnapshot) {
             var aRef = new Firebase(FB_URL);
@@ -56,8 +55,10 @@ module.exports = {
                 });
 
             } else {
-                lookup_channel_data = childSnapshot.val()
+                lookup_channel_data = childSnapshot.val();
+                console.log("Done Loading Channel Info");
             }
+
         });
 
         // Push my IP to firebase
@@ -76,23 +77,36 @@ module.exports = {
                 myRootRef.update({
                     "tvguide": result
                 });
+            tvguide.shows(result, "Big Bang Theory", function(_shows) {
+        for (item in _shows){
+           data = _shows[item];
+           var date = new Date(data["year"], data["month"], data["day"], data["hh"], data["mm"], 0);
+           console.log(date);
+           self.queue(date, data["program"], data["length"], data["title"], data["id"]);
+           self.schedule(date, myRootRef, data["program"], data["length"], data["title"], data["id"]);
+        }
+
+            });
+
+
             });
 
         }
 
-        console.log("Done");
+        console.log("Done Initializing");
     },
     tuner: function(date, duration){
          var return_val = -1;
          if (myRootRef.child("scheduled") != null)  {
 //            for (var key in myRootRef.child("scheduled").val()){            
-         console.log("Found a SCheduled Task!");
+         console.log("Found a Scheduled Task!");
       }
       return 0;
     },
     schedule: function(date, ref_val, channel_val, length_val, title_val, id_val) {
         var self = this
         var tuner_index = self.tuner(date, length_val);
+        console.log("Schedule");
         console.log(channel_val);
         console.log(length_val);
         console.log(title_val);
@@ -101,12 +115,11 @@ module.exports = {
            myRootRef.child("scheduled").push({"date" : date.getTime(), "channel" : channel_val, "length" : length_val, "title" : title_val, "tuner" : tuner_index});
         }
         else{
-           console.log("myroot reff null");
+           console.log("myroot ref null");
         }
 
         var j = schedule.scheduleJob(date, function(ref, channel, length, title, id, tuner) {
            tvguide.get_name(id, function(result) {
-                console.log("we got to this point");
                 var filename = result;
                 var info = self.lookup_channel(channel);
                 ref.update({
@@ -127,6 +140,13 @@ module.exports = {
             });
         }.bind(null, ref_val, channel_val, length_val, title_val, id_val, tuner_index));
     },
+    cleanup_error: function(err) {
+        return function(err) {
+            console.log(err);
+            ipRef.remove(onComplete);
+            myRootRef.child("scheduled").remove(onComplete);
+        }
+    },
     cleanup: function() {
         return function() {
             ipRef.remove(onComplete);
@@ -135,6 +155,7 @@ module.exports = {
     },
     queue : function(date, channel_val, length_val, title_val, id_val) {
        if (myRootRef != null){
+          console.log("Queue Date");
           console.log(date.getTime());
           myRootRef.child("jobs").push({"date" : date.getTime(), "channel" : channel_val, "length" : length_val, "title" : title_val, "id" : id_val});
        }
@@ -146,6 +167,7 @@ module.exports = {
         if (lookup_channel_data === null) {
             console.log("Lookup Channel Data Not Setup");
         }
+        console.log("Lookup Data");
         console.log("Lookup Data " + lookup_channel_data);
         return lookup_channel_data[program];
     }
