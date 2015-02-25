@@ -140,13 +140,6 @@ module.exports = {
             });
         }.bind(null, ref_val, channel_val, length_val, title_val, id_val, tuner_index));
     },
-    cleanup_error: function(err) {
-        return function(err) {
-            console.log(err);
-            ipRef.remove(onComplete);
-            myRootRef.child("scheduled").remove(onComplete);
-        }
-    },
     cleanup: function() {
         return function() {
             ipRef.remove(onComplete);

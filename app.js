@@ -89,7 +89,10 @@ process.stdin.resume(); //so the program will not close instantly
 process.on('SIGINT', dvr.cleanup());
 
 //catches uncaught exceptions
+// Here's where I'm torn. I need to call dvr.cleanup as well, not sure if this will work 
+// if I add it.
 //process.on('uncaughtException', dvr.cleanup_error(err));
 process.on('uncaughtException', function(err) {
   console.error(err.stack);
+  dvr.cleanup();
 });
