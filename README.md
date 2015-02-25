@@ -64,6 +64,9 @@ TODO LIST (Make suggestions or pull requests please!)
 12. Figure out "newness" of episode, I *think* AiringAttrib 44 means new, but there are others (I'm certain of that), not sure how to tell.
 13. For the Web Site, display a footer that you can click on that will slide up and show all recordings, while closed it'll show the closest upcoming recording though.
 14. Figure out commercial skipping (perhaps this would be useful)
+15. 
 https://github.com/MythTV/mythtv/tree/master/mythtv/programs/mythcommflag
+
 http://www.mythtv.org/wiki/How_to_write_a_new_method_of_commercial_detection
+
 https://code.mythtv.org/doxygen/classClassicCommDetector.html
