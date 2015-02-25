@@ -98,8 +98,13 @@ module.exports = {
     tuner: function(date, duration){
          var return_val = -1;
          if (myRootRef.child("scheduled") != null)  {
-//            for (var key in myRootRef.child("scheduled").val()){            
-         console.log("Found a Scheduled Task!");
+         //1. Look through all scheduled tasks and look for a date that is during the date time + duration (overlapping).
+         //1a. If none exists, then return 0
+         //1b. If only one exists, check the tuner identifier, if it's 0 return 1
+         //1b. If more than one exists, set fb/conflict list
+         
+//         for (var key in myRootRef.child("scheduled").val()){            
+         console.log(myRootRef.child("scheduled"));
       }
       return 0;
     },

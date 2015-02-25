@@ -47,7 +47,11 @@ TODO LIST (Make suggestions or pull requests please!)
 1. Update documentation Make things clearer, better directions.
 2. Manage Schedule Conflicts
 3. Optionally use second tuner
-4. Ensure Naming makes sense for all that is recorded.
+         1. Look through all scheduled tasks and look for a date that is during the date time + duration (overlapping).
+         1a. If none exists, then return 0
+         1b. If only one exists, check the tuner identifier, if it's 0 return 1
+         1b. If more than one exists, set fb/conflict list
+4. Ensure Naming makes sense for all that is recorded. <-- I *think* this one is sufficient I am using a package for naming to local file structures.
 5. Upgrade to using HDHomerun nodejs package (currently using shell script with hdhomerun_config installed).
 6. Store off recording history (for failure conditions).
 7. Implement Record Now (and start recording if no conflicts exist, rather than in the past).
