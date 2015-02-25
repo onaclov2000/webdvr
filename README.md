@@ -63,3 +63,4 @@ TODO LIST (Make suggestions or pull requests please!)
 11. Combine config.js and angularjs's firebase reference into one file, so you copy/paste the same file in two places.
 12. Figure out "newness" of episode, I *think* AiringAttrib 44 means new, but there are others (I'm certain of that), not sure how to tell.
 13. For the Web Site, display a footer that you can click on that will slide up and show all recordings, while closed it'll show the closest upcoming recording though.
+14. Figure out commercial skipping (perhaps this would be useful) https://github.com/MythTV/mythtv/tree/ef8694a20a3db8f1da91e78074314cdc635f6cf9/mythtv/programs/mythcommflag
