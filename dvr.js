@@ -191,22 +191,16 @@ function onComplete() {
     process.exit();
 }
 function conflict(time1, duration1, time2, duration2){
-
-if (time1 < time2){
-   // And it's end time is after this job starts
-   if (time1 + duration1 > time2){
+   if (time1 < time2) && (time2 < time1 + duration1){
+      return true;
+   }
+   if (time2 < time1) & (time1 < time2 + duration2){
       // so we've found a conflict
       return true;
    }
-}
-// otherwise our scheduled show is after
-else{
-   // in which case if our new show overlaps with our next one.
-   if (time1 > time2 + duration2){
-      // so we've found a conflict
+   if (time1 == time2){
       return true;
    }
-}
 
-return false;
+   return false;
 }
