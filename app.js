@@ -34,8 +34,6 @@ myRootRef.child("jobs").once('value', function(childSnapshot) {
          for (var key in childSnapshot.val()){
            var x = childSnapshot.val()[key];
            if (myRootRef != null){
-              console.log("Jobs");
-              console.log(new Date(x["date"]));
               var Today = new Date().getTime();
               var schedule = new Date(x["date"]).getTime();
               if (schedule + (x["length"] * 1000) > Today){

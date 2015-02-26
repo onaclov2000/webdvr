@@ -9,6 +9,7 @@ var spawn = require('child_process').spawn;
 var ipRef = null;
 var lookup_channel_data = {};
 var current_channel = "";
+var scheduled_jobs = [];
 module.exports = {
     //   lookup_data : 
     initialize: function() {
@@ -81,11 +82,9 @@ module.exports = {
         for (item in _shows){
            data = _shows[item];
            var date = new Date(data["year"], data["month"], data["day"], data["hh"], data["mm"], 0);
-           console.log(date);
            self.queue(date, data["program"], data["length"], data["title"], data["id"]);
            self.schedule(date, myRootRef, data["program"], data["length"], data["title"], data["id"]);
         }
-
             });
 
 
@@ -96,54 +95,69 @@ module.exports = {
         console.log("Done Initializing");
     },
     tuner: function(date, duration){
-         var return_val = -1;
-         if (myRootRef.child("scheduled") != null)  {
+         var return_val = 0; // always try to return 0 by default
+         var number_of_tuners = 1; // really base 0, so 2 tuners should be determined at initialization, but for now this will work.
+         if (scheduled_jobs != null)  {
          //1. Look through all scheduled tasks and look for a date that is during the date time + duration (overlapping).
          //1a. If none exists, then return 0
          //1b. If only one exists, check the tuner identifier, if it's 0 return 1
-         //1b. If more than one exists, set fb/conflict list
-         
-//         for (var key in myRootRef.child("scheduled").val()){            
-         console.log(myRootRef.child("scheduled"));
+         //1b. If more than one exists, set fb/conflict list         
+         for (var key in scheduled_jobs){            
+            // If the scheduled job is before this job
+            if (conflict(scheduled_jobs[key]["date"], scheduled_jobs[key]["length"], date, duration))
+            {
+               // total conflicts - 1 means we have had more conflicts than tuners and have to fail
+               if (return_val == number_of_tuners - 1)
+               {
+                  //we can't recover
+                  return -1;
+               }
+               else{
+                  return_val++;
+               }
+            }
+         }
       }
-      return 0;
+      return return_val;
     },
     schedule: function(date, ref_val, channel_val, length_val, title_val, id_val) {
         var self = this
         var tuner_index = self.tuner(date, length_val);
-        console.log("Schedule");
-        console.log(channel_val);
-        console.log(length_val);
-        console.log(title_val);
-        console.log(id_val);
-        if (myRootRef != null){
-           myRootRef.child("scheduled").push({"date" : date.getTime(), "channel" : channel_val, "length" : length_val, "title" : title_val, "tuner" : tuner_index});
-        }
-        else{
-           console.log("myroot ref null");
-        }
+        //console.log("Schedule");
+        if (tuner_index > -1){
+           if (myRootRef != null){
+              myRootRef.child("scheduled").push({"date" : date.getTime(), "channel" : channel_val, "length" : length_val, "title" : title_val, "tuner" : tuner_index});
+           }
+           else{
+              console.log("myroot ref null");
+           }
+           scheduled_jobs.push({"date" : date.getTime(), "channel" : channel_val, "length" : length_val, "title" : title_val, "tuner" : tuner_index});
+           var j = schedule.scheduleJob(date, function(ref, channel, length, title, id, tuner) {
+              tvguide.get_name(id, function(result) {
+                   var filename = result;
+                   var info = self.lookup_channel(channel);
+                   ref.update({
+                       "state": "recording"
+                   });
+                   console.log("Recording title " + title + " for " + length / 60 + "minutes");
+                   record = spawn('./record.sh', [filename, info[0], info[1], length, tuner]);
 
-        var j = schedule.scheduleJob(date, function(ref, channel, length, title, id, tuner) {
-           tvguide.get_name(id, function(result) {
-                var filename = result;
-                var info = self.lookup_channel(channel);
-                ref.update({
-                    "state": "recording"
-                });
-                console.log("Recording title " + title + " for " + length / 60 + "minutes");
-                record = spawn('./record.sh', [filename, info[0], info[1], length, tuner]);
+                   record.stdout.on('data', function(data) {
+                      console.log(data.toString());
+                   });
 
-                record.stdout.on('data', function(data) {
-                    console.log(data.toString());
-                });
-
-                record.on('close', function(code) {
-                    ref.update({
-                        "state": "waiting"
-                    });
-                });
-            });
-        }.bind(null, ref_val, channel_val, length_val, title_val, id_val, tuner_index));
+                   record.on('close', function(code) {
+                      ref.update({
+                         "state": "waiting"
+                      });
+                   });
+               });
+           }.bind(null, ref_val, channel_val, length_val, title_val, id_val, tuner_index));
+       }
+       else{
+          // push to conflicts firebase location
+          console.log("Too Many Conflicts");
+       }
     },
     cleanup: function() {
         return function() {
@@ -153,8 +167,7 @@ module.exports = {
     },
     queue : function(date, channel_val, length_val, title_val, id_val) {
        if (myRootRef != null){
-          console.log("Queue Date");
-          console.log(date.getTime());
+          //console.log("Queuing Show");
           myRootRef.child("jobs").push({"date" : date.getTime(), "channel" : channel_val, "length" : length_val, "title" : title_val, "id" : id_val});
        }
        else{
@@ -165,7 +178,6 @@ module.exports = {
         if (lookup_channel_data === null) {
             console.log("Lookup Channel Data Not Setup");
         }
-        console.log("Lookup Data");
         console.log("Lookup Data " + lookup_channel_data);
         return lookup_channel_data[program];
     }
@@ -177,4 +189,24 @@ module.exports = {
  */
 function onComplete() {
     process.exit();
+}
+function conflict(time1, duration1, time2, duration2){
+
+if (time1 < time2){
+   // And it's end time is after this job starts
+   if (time1 + duration1 > time2){
+      // so we've found a conflict
+      return true;
+   }
+}
+// otherwise our scheduled show is after
+else{
+   // in which case if our new show overlaps with our next one.
+   if (time1 > time2 + duration2){
+      // so we've found a conflict
+      return true;
+   }
+}
+
+return false;
 }

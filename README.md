@@ -70,3 +70,5 @@ https://github.com/MythTV/mythtv/tree/master/mythtv/programs/mythcommflag
 http://www.mythtv.org/wiki/How_to_write_a_new_method_of_commercial_detection
 
 https://code.mythtv.org/doxygen/classClassicCommDetector.html
+
+15. Remove duplicate id's from tvguide.show() function return. Right now I see a lot of dupes

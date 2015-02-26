@@ -23,22 +23,16 @@ module.exports = {
             });
         });
     },
+    // Need to remove duplicates
     shows: function(entire_listing, show, callback) {
         var res = [];
-        console.log(entire_listing);
         for (key in entire_listing){
            // grab the index.
-           //console.log(entire_listing[key]["ProgramSchedules"]);
            for (item in entire_listing[key]["ProgramSchedules"]){  
-               //console.log(item);      
-               //console.log(key);     
-               //console.log(entire_listing[key]["ProgramSchedules"][item]);
-                
                 if (entire_listing[key]["ProgramSchedules"][item]["Title"].indexOf(show) > -1){
 		        startTime = entire_listing[key]["ProgramSchedules"][item]["StartTime"];
 		        endTime = entire_listing[key]["ProgramSchedules"][item]["EndTime"];
 		        var scheduledDate = new Date((startTime - 120) * 1000);
-                        console.log(scheduledDate);
 		        // always record 2 minutes before and 2 minutes after approx
 		        var duration = (endTime - startTime) + 240;
 		        res.push({
@@ -56,7 +50,6 @@ module.exports = {
                 }
            }
         } 
-//        console.log(res);
         callback(res);
     },
 
