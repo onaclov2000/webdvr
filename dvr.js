@@ -120,6 +120,25 @@ module.exports = {
       }
       return return_val;
     },
+    get_tuners: function() {
+        myRootRef.child("tuner_info").once('value', function(childSnapshot) {
+            var aRef = new Firebase(FB_URL);
+
+            if (childSnapshot.val() === null) {
+                result = spawn('hdhomerun_config', ["discover"]);
+                var temp_data = "";
+                result.stdout.on('data', function(data) {
+                    temp_data += data;
+                });
+                result.on('close', function(code) {
+                    console.log(temp_data);
+                    aRef.update({
+                        tuner_info: temp_data
+                    });
+                });
+         }
+     });
+},
     schedule: function(date, ref_val, channel_val, length_val, title_val, id_val) {
         var self = this
         var tuner_index = self.tuner(date, length_val);
