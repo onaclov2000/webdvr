@@ -3,6 +3,37 @@ webdvr
 
 Web based DVR scheduling for HDHomerun using Raspberry Pi, NodeJS and Firebase.
 
+Pi Configurations
+=================
+There are some configuration items that may be handy, I'm documenting them here so I can access them in the future if necessary (or automatically setup when I get to it).
+
+Using Wifi to connect to internet and ethernet to connect to HDHomerun Dual.
+
+Backup your existing network interfaces in case you need to revert.
+    
+    sudo cp nano /etc/network/interfaces /etc/network/interfaces.bak
+
+Edit the interfaces file.
+
+    sudo nano /etc/network/interfaces
+
+    auto lo
+    
+    iface lo inet loopback
+    iface eth0 inet static
+    address 169.254.0.1
+    netmask 255.255.0.0
+    
+    allow-hotplug wlan0
+    iface wlan0 inet manual
+    wpa-roam /etc/wpa_supplicant/wpa_supplicant.conf
+    iface default inet dhcp 
+
+The main difference here is that I set the eth0 to static and gave it a link local address, perhaps another address might work, but this worked and I'm sticking with it.
+   
+Give it a reboot to be sure it works right.
+
+
 How it works
 =============
 Start with:
