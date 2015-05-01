@@ -104,7 +104,9 @@ TODO LIST (Make suggestions or pull requests please!)
 11. Combine config.js and angularjs's firebase reference into one file, so you copy/paste the same file in two places.
 12. Figure out "newness" of episode, I *think* AiringAttrib 44 means new, but there are others (I'm certain of that), not sure how to tell.
 13. For the Web Site, display a footer that you can click on that will slide up and show all recordings, while closed it'll show the closest upcoming recording though.
-14. Figure out commercial skipping (perhaps this would be useful)
+14. Remove duplicate id's from tvguide.show() function return. Right now I see a lot of dupes
+15. Calculate size remaining, if size remaining and scheduled overlap then send email possibly (using sendgrid?)
+16. Figure out commercial skipping (perhaps this would be useful)
 
 https://github.com/MythTV/mythtv/tree/master/mythtv/programs/mythcommflag
 
@@ -112,4 +114,8 @@ http://www.mythtv.org/wiki/How_to_write_a_new_method_of_commercial_detection
 
 https://code.mythtv.org/doxygen/classClassicCommDetector.html
 
-15. Remove duplicate id's from tvguide.show() function return. Right now I see a lot of dupes
+Possible Python option
+
+https://www.mythtv.org/wiki/Mythcommflag-wrapper
+
+
