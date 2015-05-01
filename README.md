@@ -44,6 +44,10 @@ Finally
     
 Should work!
 
+
+Automount your hard drive. setup.
+
+
 How it works
 =============
 Start with:
