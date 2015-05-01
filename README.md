@@ -32,7 +32,17 @@ Edit the interfaces file.
 The main difference here is that I set the eth0 to static and gave it a link local address, perhaps another address might work, but this worked and I'm sticking with it.
    
 Give it a reboot to be sure it works right.
+If you have the command line tools installed below
 
+    hdhomerun_config discover
+    
+Should result in a IP address in the 169 range for the first octet.
+
+Finally
+
+    ping www.google.com
+    
+Should work!
 
 How it works
 =============
