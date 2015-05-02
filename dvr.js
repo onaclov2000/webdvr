@@ -79,7 +79,7 @@ module.exports = {
                     "tvguide": result
                 });
           for (se in myRootRef.recurring){
-                 console.log(se["search"]);
+                 console.log(se);
           }
             tvguide.shows(result, "Big Bang Theory", function(_shows) {
         for (item in _shows){
