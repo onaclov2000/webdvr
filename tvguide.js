@@ -26,6 +26,7 @@ module.exports = {
     // Need to remove duplicates
     shows: function(entire_listing, show, callback) {
         var res = [];
+        console.log(show);
         for (key in entire_listing){
            // grab the index.
            for (item in entire_listing[key]["ProgramSchedules"]){  
