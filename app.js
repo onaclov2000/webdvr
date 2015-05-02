@@ -20,12 +20,15 @@ var j = schedule.scheduleJob(rule, function() {
         });
         // I'm thinking here we queue a list of series.
         // And possibly schedule it
-        data = tvguide.shows(result);
-        for (item in data){
+            
+        data = tvguide.shows(result, "Big Bang Theory", function(_shows) {
+        for (item in _shows){
+           data = _shows[item];
            var date = new Date(data["year"], data["month"], data["day"], data["hh"], data["mm"], 0);
-           dvr.queue(date, data["program"], data["length"], data["title"], data["id"]);
-           dvr.schedule(date, localref, data["program"], data["length"], data["title"], data["id"]);
+           self.queue(date, data["program"], data["length"], data["title"], data["id"]);
+           self.schedule(date, myRootRef, data["program"], data["length"], data["title"], data["id"]);
         }
+            });
     });
 });
 

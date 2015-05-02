@@ -78,7 +78,6 @@ module.exports = {
                 myRootRef.update({
                     "tvguide": result
                 });
-                if (result){
             tvguide.shows(result, "Big Bang Theory", function(_shows) {
         for (item in _shows){
            data = _shows[item];
@@ -87,7 +86,6 @@ module.exports = {
            self.schedule(date, myRootRef, data["program"], data["length"], data["title"], data["id"]);
         }
             });
-}
 
             });
 
