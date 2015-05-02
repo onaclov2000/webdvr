@@ -1,8 +1,10 @@
 angular.module('myApp', ['firebase'])
     .controller("MyCtrl", ["$scope", "$firebase",
         function($scope, $firebase) {
-            var ref = new Firebase('https://onaclovtech-home.firebaseio.com/dvr/');
+            var ref = new Firebase('');
+            var regexref = new Firebase('/recurring');
             var sync = $firebase(ref);
+            var resync = $firebase(regexref);
 
             // if ref points to a data collection
             $scope.list = sync.$asArray();
@@ -10,6 +12,10 @@ angular.module('myApp', ['firebase'])
             // if ref points to a single record
             $scope.rec = sync.$asObject();
 
+            $scope.addRecurring = function(show){
+                resync.$push({'search': show});
+
+            };
 
             $scope.record = function(element, parent) {
                 // always start recording about 2 minutes before   
@@ -21,8 +27,7 @@ angular.module('myApp', ['firebase'])
                 // this should send the good stuff
                 sync.$update("status", {
                     commanded: 'new',
-                    // Firebase Workaround for not allowed to have .'s in paths
-                    program: parent.replace('.', '-'),
+                    program: parent.replace('.','-'),
                     day: scheduledDate.getDate(),
                     month: scheduledDate.getMonth(),
                     year: scheduledDate.getFullYear(),

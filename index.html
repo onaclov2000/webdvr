@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+    <!DOCTYPE html>
 <html lang="en" ng-app="myApp">
 
 <head>
@@ -9,6 +9,8 @@
     <!-- Latest compiled and minified CSS -->
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.2/css/bootstrap.min.css">
 
+<!-- jQuery (necessary for Bootstrap's JavaScript plugins) -->
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.2/jquery.min.js"></script>
     <!-- Optional theme -->
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.2/css/bootstrap-theme.min.css">
 
@@ -17,6 +19,16 @@
 </head>
 
 <body ng-controller="MyCtrl">
+<div class="dropdown">
+  <button class="btn btn-default dropdown-toggle" type="button" id="dropdownMenu1" data-toggle="dropdown" aria-expanded="true">
+    Dropdown
+    <span class="caret"></span>
+  </button>
+  <ul class="dropdown-menu" role="menu" aria-labelledby="dropdownMenu1">
+    <li role="presentation" ng-repeat="show in rec['scheduled']">{{show.title}}@{{show.date | date:'MMM dd, yyyy HH:mm:ss'}}</li>
+  </ul>
+</div>
+<label>Regex Record</label><input ng-model="recurring"></input><button ng-click="addRecurring(recurring)">Add Recurring Record</button>
 
     <div ng-repeat="show in rec['tvguide']">
         <table class="table table-striped">
@@ -32,6 +44,28 @@
                     <td>
                         <div ng-show="programs.AiringAttrib == 44">new</div>
                     </td>
+            </tr>
+        </table>
+    </div>
+
+</body>
+
+</html>
+    <div ng-repeat="show in rec['tvguide']">
+        <table class="table table-striped">
+            <tr>
+                <th>{{show.Channel.Number}} {{show.Channel.FullName}}</th>
+                <td></td>
+                <td></td>
+            </tr>
+            <tr ng-repeat="programs in show.ProgramSchedules">
+                <td>
+                    <a href="#" ng-click="record(programs, show.Channel.Number)">{{programs.Title}}</a>
+                </td>
+                <td>{{programs.StartTime * 1000 | date:'MMM dd, yyyy HH:mm:ss'}}</td>
+                <td>
+                    <div ng-show="programs.AiringAttrib == 44">new</div>
+                </td>
             </tr>
         </table>
     </div>
