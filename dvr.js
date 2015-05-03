@@ -70,18 +70,17 @@ module.exports = {
             "ip": addresses[0]
         });
 
-
-
-        // first time let's make sure we have a legit listing
+         
+      // first time let's make sure we have a legit listing
         if (!myRootRef.tvguide) {
             tvguide.get(Math.floor((new Date).getTime() / 1000), 1440, function(result) {
                 myRootRef.update({
                     "tvguide": result
                 });
-          for (se in myRootRef.recurring){
-                 console.log(se["search"]);
-          }
-            tvguide.shows(result, "Big Bang Theory", function(_shows) {
+myRootRef.child("recurring").once('value', function(childSnapshot) {
+childSnapshot.forEach(function(dataSnapshot) {
+var key = dataSnapshot.val(); // key will be "fred"
+            tvguide.shows(result, key["search"], function(_shows) {
         for (item in _shows){
            data = _shows[item];
            var date = new Date(data["year"], data["month"], data["day"], data["hh"], data["mm"], 0);
@@ -89,7 +88,8 @@ module.exports = {
            self.schedule(date, myRootRef, data["program"], data["length"], data["title"], data["id"]);
         }
             });
-
+});
+});
             });
 
         }

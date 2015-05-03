@@ -21,13 +21,19 @@ var j = schedule.scheduleJob(rule, function() {
         // I'm thinking here we queue a list of series.
         // And possibly schedule it
 
-        data = tvguide.shows(result, se["search"], function(_shows) {
+myRootRef.child("recurring").once('value', function(childSnapshot) {
+childSnapshot.forEach(function(dataSnapshot) {
+var key = dataSnapshot.val(); // key will be "fred"
+            tvguide.shows(result, key["search"], function(_shows) {
+
         for (item in _shows){
            data = _shows[item];
            var date = new Date(data["year"], data["month"], data["day"], data["hh"], data["mm"], 0);
            self.queue(date, data["program"], data["length"], data["title"], data["id"]);
            self.schedule(date, myRootRef, data["program"], data["length"], data["title"], data["id"]);
         }
+});
+});
             });
     });
 });
