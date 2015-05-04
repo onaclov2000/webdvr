@@ -10,7 +10,7 @@ var dvr = require('./dvr')
 dvr.initialize();
 
 var rule = new schedule.RecurrenceRule();
-rule.hour = 23;
+rule.hour = 11;
 rule.minute = 59;
 var j = schedule.scheduleJob(rule, function() {
     // I picked 25 hours as my rotation, this way I get enough coverage each night at midnight, to cover into the next morning a hair.
@@ -25,7 +25,7 @@ myRootRef.child("recurring").once('value', function(childSnapshot) {
 childSnapshot.forEach(function(dataSnapshot) {
 var key = dataSnapshot.val(); // key will be "fred"
             tvguide.shows(result, key["search"], function(_shows) {
-
+            console.log("Doing Recurring Search");
         for (item in _shows){
            data = _shows[item];
            var date = new Date(data["year"], data["month"], data["day"], data["hh"], data["mm"], 0);

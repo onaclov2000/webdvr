@@ -186,13 +186,23 @@ var key = dataSnapshot.val(); // key will be "fred"
             myRootRef.child("scheduled").remove(onComplete);
         }
     },
+   cleanup_jobs: function(){
+        myRootRef.child('jobs').once('value', function(snapshot){
+           snapshot.forEach(function(dataSnapshot) {
+              var key = dataSnapshot.val(); // key will be "fred"
+              console.log(new Date(key["date"] + key["length"]).getTime());
+              
+           });
+        
+   });   
+   }
     queue : function(date, channel_val, length_val, title_val, id_val) {
        if (myRootRef != null){
           //console.log("Queuing Show");
           myRootRef.child("jobs").push({"date" : date.getTime(), "channel" : channel_val, "length" : length_val, "title" : title_val, "id" : id_val});
        }
        else{
-          console.log("myroot reff null");
+          console.log("myroot ref null");
        }
     },
     lookup_channel: function(program) {
