@@ -10,6 +10,7 @@ var ipRef = null;
 var lookup_channel_data = {};
 var current_channel = "";
 var scheduled_jobs = [];
+var unique_jobs = [];
 module.exports = {
     //   lookup_data : 
     initialize: function() {
@@ -186,10 +187,30 @@ var key = dataSnapshot.val(); // key will be "fred"
             myRootRef.child("scheduled").remove(onComplete);
         }
     },
+    cleanup_jobs : function(){
+     myRootRef.child('jobs').once('value', function(snapshot){
+         
+         snapshot.forEach(function(res){
+           var data = res.val();
+           var today = new Date().getTime();
+           var job = data["date"] + data["length"]; //new Date(data["date"] + data["length"]);
+           // Remove OLD Shows
+           if (today > job){
+              console.log("Removing Job" + data["title"] + "@" + new Date(data["date"]));
+              myRootRef.child(res.key()).remove();
+           }
+
+      });
+    });
+    },
     queue : function(date, channel_val, length_val, title_val, id_val) {
        if (myRootRef != null){
-          //console.log("Queuing Show");
+          //console.log("Queuing Show");  
+          if (unique_jobs.indexOf(id_val) == -1){
+             unique_jobs.push(id_val);          
+             // dont push if we see a duplicate entry
           myRootRef.child("jobs").push({"date" : date.getTime(), "channel" : channel_val, "length" : length_val, "title" : title_val, "id" : id_val});
+          }
        }
        else{
           console.log("myroot reff null");
