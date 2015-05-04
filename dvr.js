@@ -1,10 +1,10 @@
-
 var FB_URL = require('./config').FB_URL;
 var Firebase = require('firebase');
 var myRootRef = new Firebase(FB_URL);
 var os = require('os')
 var schedule = require('node-schedule');
 var tvguide = require('./tvguide');
+var disk = require('./disk');
 var spawn = require('child_process').spawn;
 var ipRef = null;
 var lookup_channel_data = {};
@@ -71,7 +71,11 @@ module.exports = {
             "ip": addresses[0]
         });
 
-         
+                   disk.time(function(res){
+                      myRootRef.update({
+                         "time_remaining": res
+                      });
+                   });         
       // first time let's make sure we have a legit listing
         if (!myRootRef.tvguide) {
             tvguide.get(Math.floor((new Date).getTime() / 1000), 1440, function(result) {
@@ -163,6 +167,12 @@ var key = dataSnapshot.val(); // key will be "fred"
                    });
                    console.log("Recording title " + title + " for " + length / 60 + "minutes");
                    record = spawn('./record.sh', [filename, info[0], info[1], length, tuner]);
+
+                   disk.time(function(res){
+                      ref.update({
+                         "time_remaining": res - (length / 3600)
+                      });
+                   });
 
                    record.stdout.on('data', function(data) {
                       console.log(data.toString());

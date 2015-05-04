@@ -19,14 +19,25 @@
 </head>
 
 <body ng-controller="MyCtrl">
+Recording Time Left {{rec.time_remaining}} hours
 <div class="dropdown">
   <button class="btn btn-default dropdown-toggle" type="button" id="dropdownMenu1" data-toggle="dropdown" aria-expanded="true">
-    Dropdown
+    Scheduled Recordings
     <span class="caret"></span>
   </button>
   <ul class="dropdown-menu" role="menu" aria-labelledby="dropdownMenu1">
     <li role="presentation" ng-repeat="show in rec['scheduled']">{{show.title}}@{{show.date | date:'MMM dd, yyyy HH:mm:ss'}}</li>
   </ul>
+</div>
+<div class="dropdown">
+  <button class="btn btn-default dropdown-toggle" type="button" id="dropdownMenu1" data-toggle="dropdown" aria-expanded="true">
+    Searches
+    <span class="caret"></span>
+  </button>
+  <ul class="dropdown-menu" role="menu" aria-labelledby="dropdownMenu2">
+    <li role="presentation" ng-repeat="show in rec['recurring']">{{show.search}}</li>
+  </ul>
+
 </div>
 <label>Regex Record</label><input ng-model="recurring"></input><button ng-click="addRecurring(recurring)">Add Recurring Record</button>
 
@@ -37,7 +48,7 @@
                 <td></td>
                 <td></td>
             </tr>
-            <tr ng-repeat="programs in show.ProgramSchedules">
+            <tr ng-repeat="programs in show.ProgramSchedules" ng-hide="programs.Title == 'Paid Programming'">
                 <td>
                     <a href="#" ng-click="record(programs, show.Channel.Number)">{{programs.Title}}</a>
                     <td>{{programs.StartTime * 1000 | date:'MMM dd, yyyy HH:mm:ss'}}</td>

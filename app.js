@@ -87,7 +87,14 @@ myRootRef.on('child_changed', function(childSnapshot, prevChildName) {
 
     }
 });
-
+/*
+myRootRef.child('recurring').on('child_changed', function(childSnapshot, prevChildName) {
+    // code to handle child data changes.
+    var data = childSnapshot.val();
+    var localref = childSnapshot.ref();
+    console.log(data);
+});
+*/
 // Do something when app is closing
 process.on('exit', dvr.cleanup());
 
