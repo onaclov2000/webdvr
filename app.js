@@ -57,6 +57,7 @@ myRootRef.child("jobs").once('value', function(childSnapshot) {
               console.log("Ref is null");
           }
         }
+       dvr.cleanup_jobs();
      }
      else{
        console.log("No Outstanding Jobs Left To Schedule");
