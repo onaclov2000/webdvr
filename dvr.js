@@ -3,8 +3,7 @@ var Firebase = require('firebase');
 var myRootRef = new Firebase(FB_URL);
 
 var scheduler = require('./scheduler');
-var tvguide = require('./tvguide');
-var disk = require('./disk');
+
 var spawn = require('child_process').spawn;
 var ipRef = null;
 var lookup_channel_data = {};
