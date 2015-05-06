@@ -94,30 +94,6 @@ myRootRef.on('child_changed', function(childSnapshot, prevChildName) {
     }
 });
 
-
-if (!myRootRef.tvguide) {
-            tvguide.get(Math.floor((new Date).getTime() / 1000), 1440, function(result) {
-                myRootRef.update({
-                    "tvguide": result
-                });
-myRootRef.child("recurring").once('value', function(childSnapshot) {
-childSnapshot.forEach(function(dataSnapshot) {
-var key = dataSnapshot.val(); // key will be "fred"
-            tvguide.shows(result, key["search"], function(_shows) {
-        for (item in _shows){
-           data = _shows[item];
-           var date = new Date(data["year"], data["month"], data["day"], data["hh"], data["mm"], 0);
-           self.queue(date, data["program"], data["length"], data["title"], data["id"]);
-           self.schedule(date, myRootRef, data["program"], data["length"], data["title"], data["id"]);
-        }
-            });
-});
-});
-            });
-
-        }
-        
-        
         // The scheduler should have a "conflict resolution"
     tuner: function(date, duration){
          var return_val = 0; // always try to return 0 by default
