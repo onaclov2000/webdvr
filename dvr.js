@@ -113,20 +113,7 @@ module.exports = {
       });
     });
     },
-    // scheduler file
-    queue : function(date, channel_val, length_val, title_val, id_val) {
-       if (myRootRef != null){
-          //console.log("Queuing Show");  
-          if (unique_jobs.indexOf(id_val) == -1){
-             unique_jobs.push(id_val);          
-             // dont push if we see a duplicate entry
-          myRootRef.child("jobs").push({"date" : date.getTime(), "channel" : channel_val, "length" : length_val, "title" : title_val, "id" : id_val});
-          }
-       }
-       else{
-          console.log("myroot ref null");
-       }
-    },
+    
     //remains, rename to "channel" probably, so we can lookup a channel via the program
     lookup_channel: function(program) {
         if (lookup_channel_data === null) {
