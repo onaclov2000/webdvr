@@ -1,4 +1,6 @@
 // will be a "module" eventually, but this code grabs the json stream
+// This module should ONLY gather raw data from tvguide, and preferrably cache it to about 30 minutes. If you want to translate the data we should have a "filter" file/function that does that.
+
 var http = require("http");
 var sanitize = require("sanitize-filename")
 
