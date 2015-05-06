@@ -7,8 +7,10 @@ var tvguide = require('./tvguide');
 var myRootRef = new Firebase(FB_URL);
 var dvr = require('./dvr')
 
+// This should be a "start" and that is about all this file should do I think... right?
 dvr.initialize();
 
+// This should be moved to a scheduler
 var rule = new schedule.RecurrenceRule();
 rule.hour = 11;
 rule.minute = 59;
@@ -18,9 +20,9 @@ var j = schedule.scheduleJob(rule, function() {
         myRootRef.update({
             "tvguide": result
         });
-        // I'm thinking here we queue a list of series.
-        // And possibly schedule it
 
+
+// Wondering if there should be a firebase function or something where all these "once's" reside.
 myRootRef.child("recurring").once('value', function(childSnapshot) {
 childSnapshot.forEach(function(dataSnapshot) {
 var key = dataSnapshot.val(); // key will be "fred"
@@ -29,8 +31,9 @@ var key = dataSnapshot.val(); // key will be "fred"
         for (item in _shows){
            data = _shows[item];
            var date = new Date(data["year"], data["month"], data["day"], data["hh"], data["mm"], 0);
-           self.queue(date, data["program"], data["length"], data["title"], data["id"]);
-           self.schedule(date, myRootRef, data["program"], data["length"], data["title"], data["id"]);
+           dvr.queue(date, data["program"], data["length"], data["title"], data["id"]);
+           // Scheduling should only occur in one place, not 20 places here. We can *queue* something, but not schedule over and over
+           //dvr.schedule(date, myRootRef, data["program"], data["length"], data["title"], data["id"]);
         }
 });
 });
@@ -38,7 +41,10 @@ var key = dataSnapshot.val(); // key will be "fred"
     });
 });
 
-myRootRef.child("jobs").once('value', function(childSnapshot) {
+// This should be moved to a 'scheduler', in theory we run through the jobs once, then when the snapshot changes we can re-assess whether we should schedule another.
+myRootRef.child("jobs").once('child_changed', function(childSnapshot) {
+     // This needs to be re-worked
+/*
      if (childSnapshot.val() != null){
          for (var key in childSnapshot.val()){
            var x = childSnapshot.val()[key];
@@ -62,12 +68,12 @@ myRootRef.child("jobs").once('value', function(childSnapshot) {
      else{
        console.log("No Outstanding Jobs Left To Schedule");
      }
-     
+     */
 });
 
 // add loop to schedule when starting up.
 
-// When we see that a commanded record has taken place we should do something about it
+// When we see that a commanded record has taken place we should do something about it. 
 myRootRef.on('child_changed', function(childSnapshot, prevChildName) {
     // code to handle child data changes.
     var data = childSnapshot.val();
@@ -83,18 +89,12 @@ myRootRef.on('child_changed', function(childSnapshot, prevChildName) {
         // queue in this case means we need to make sure we keep track of all our recordings
         // I'm open to new names but this will be sufficient for now
         dvr.queue(date, data["program"], data["length"], data["title"], data["id"]);
-        dvr.schedule(date, localref, data["program"], data["length"], data["title"], data["id"]);
+        // Scheduling only occurs and is controlled by the "job scheduler"
+        //dvr.schedule(date, localref, data["program"], data["length"], data["title"], data["id"]);
 
     }
 });
-/*
-myRootRef.child('recurring').on('child_changed', function(childSnapshot, prevChildName) {
-    // code to handle child data changes.
-    var data = childSnapshot.val();
-    var localref = childSnapshot.ref();
-    console.log(data);
-});
-*/
+
 // Do something when app is closing
 process.on('exit', dvr.cleanup());
 
