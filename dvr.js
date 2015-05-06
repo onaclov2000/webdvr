@@ -14,8 +14,25 @@ var unique_jobs = [];
 module.exports = {
     //   lookup_data : 
     start: function() {
+        self.channels();
         scheduler.start();
-// Should be a dvr function this is crazy long
+
+
+        
+// This I am not sure where it should remain, but should be in a 'disk manager' probably
+                   disk.time(function(res){
+                      myRootRef.update({
+                         "time_remaining": res
+                      });
+                   });         
+      // this is where we are scheduling recurring stuff again...this is crazy. TOO MUCH I TELL YOU.
+      // first time let's make sure we have a legit listing
+        
+
+        console.log("Done Initializing");
+    },
+    channels : function(){
+        // Should be a dvr function this is crazy long
         myRootRef.child("channel_data").once('value', function(childSnapshot) {
             var aRef = new Firebase(FB_URL);
 
@@ -53,21 +70,8 @@ module.exports = {
             }
 
         });
-
-        
-// This I am not sure where it should remain, but should be in a 'disk manager' probably
-                   disk.time(function(res){
-                      myRootRef.update({
-                         "time_remaining": res
-                      });
-                   });         
-      // this is where we are scheduling recurring stuff again...this is crazy. TOO MUCH I TELL YOU.
-      // first time let's make sure we have a legit listing
-        
-
-        console.log("Done Initializing");
-    },
-    
+    }
+    }
     // A DVR "has a" Tuner, so this should be in a "tuner" file, it should return all the tuners available
     get_tuners: function() {
         myRootRef.child("tuner_info").once('value', function(childSnapshot) {
@@ -89,30 +93,7 @@ module.exports = {
      });
 },
 
-    // Scheduler file.
-    cleanup: function() {
-        return function() {
-            ipRef.remove(onComplete);
-            myRootRef.child("scheduled").remove(onComplete);
-        }
-    },
-    // Scheduler file.
-    cleanup_jobs : function(){
-     myRootRef.child('jobs').once('value', function(snapshot){
-         
-         snapshot.forEach(function(res){
-           var data = res.val();
-           var today = new Date().getTime();
-           var job = data["date"] + data["length"]; //new Date(data["date"] + data["length"]);
-           // Remove OLD Shows
-           if (today > job){
-              console.log("Removing Job" + data["title"] + "@" + new Date(data["date"]));
-              myRootRef.child(res.key()).remove();
-           }
-
-      });
-    });
-    },
+    
     
     //remains, rename to "channel" probably, so we can lookup a channel via the program
     lookup_channel: function(program) {
