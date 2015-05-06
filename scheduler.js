@@ -200,5 +200,29 @@ var key = dataSnapshot.val(); // key will be "fred"
           console.log("myroot ref null");
        }
     },
-}
-}
+},
+// Scheduler file.
+    cleanup: function() {
+        return function() {
+            ipRef.remove(onComplete);
+            myRootRef.child("scheduled").remove(onComplete);
+        }
+    },
+    // Scheduler file.
+    cleanup_jobs : function(){
+     myRootRef.child('jobs').once('value', function(snapshot){
+         
+         snapshot.forEach(function(res){
+           var data = res.val();
+           var today = new Date().getTime();
+           var job = data["date"] + data["length"]; //new Date(data["date"] + data["length"]);
+           // Remove OLD Shows
+           if (today > job){
+              console.log("Removing Job" + data["title"] + "@" + new Date(data["date"]));
+              myRootRef.child(res.key()).remove();
+           }
+
+      });
+    });
+    },
+
