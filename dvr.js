@@ -1,8 +1,8 @@
 var FB_URL = require('./config').FB_URL;
 var Firebase = require('firebase');
 var myRootRef = new Firebase(FB_URL);
-var os = require('os')
-var schedule = require('node-schedule');
+
+var scheduler = require('./scheduler');
 var tvguide = require('./tvguide');
 var disk = require('./disk');
 var spawn = require('child_process').spawn;
@@ -14,7 +14,7 @@ var unique_jobs = [];
 module.exports = {
     //   lookup_data : 
     start: function() {
-        
+        scheduler.start();
 // Should be a dvr function this is crazy long
         myRootRef.child("channel_data").once('value', function(childSnapshot) {
             var aRef = new Firebase(FB_URL);
