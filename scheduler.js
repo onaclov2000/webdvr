@@ -1,5 +1,5 @@
-
-
+var schedule = require('node-schedule');
+module.exports = {
 start: function() {
 // This should be moved to a scheduler
 var rule = new schedule.RecurrenceRule();
@@ -200,3 +200,5 @@ var key = dataSnapshot.val(); // key will be "fred"
           console.log("myroot ref null");
        }
     },
+}
+}
