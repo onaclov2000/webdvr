@@ -1,4 +1,9 @@
+var FB_URL = require('./config').FB_URL;
+var Firebase = require('firebase');
+var myRootRef = new Firebase(FB_URL);
 var schedule = require('node-schedule');
+var tvguide = require('./tvguide');
+var disk = require('./disk');
 module.exports = {
 start: function() {
 
