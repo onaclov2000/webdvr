@@ -18,63 +18,41 @@ var j = schedule.scheduleJob(rule, function() {
 
 }
 
-module.exports = {
-start: function() {
+// Remove our scheduled recordings until we re-schedule
+myRootRef.child("scheduled").remove(onComplete);
 
 
-
-// This should be moved to a 'scheduler', in theory we run through the jobs once, then when the snapshot changes we can re-assess whether we should schedule another.
-myRootRef.child("jobs").once('child_changed', function(childSnapshot) {
-// This needs to be re-worked
-/*
-if (childSnapshot.val() != null){
-for (var key in childSnapshot.val()){
-var x = childSnapshot.val()[key];
-if (myRootRef != null){
-var Today = new Date().getTime();
-var schedule = new Date(x["date"]).getTime();
-if (schedule + (x["length"] * 1000) > Today){
-dvr.schedule(new Date(x["date"]), myRootRef, x["channel"], x["length"], x["title"], x["id"]);
-}
-else{
-myRootRef.child("jobs").child(key).remove();
-console.log("old Show");
-}
-}
-else{
-console.log("Ref is null");
-}
-}
-dvr.cleanup_jobs();
-}
-else{
-console.log("No Outstanding Jobs Left To Schedule");
-}
-*/
-});
-
-// This should be something.
-tvguide.get(Math.floor((new Date().getTime()) / 1000), 1440, function(result) {
-    myRootRef.update({
-        "tvguide": result
-    });
-    myRootRef.child("recurring").once('value', function(childSnapshot) {
-        childSnapshot.forEach(function(dataSnapshot) {
-            var key = dataSnapshot.val(); // key will be "fred"
-            tvguide.shows(result, key["search"], function(_shows) {
-                console.log("Doing Recurring Search");
-                for (item in _shows) {
-                    data = _shows[item];
-                    var date = new Date(data["year"], data["month"], data["day"], data["hh"], data["mm"], 0);
-                    dvr.queue(date, data["program"], data["length"], data["title"], data["id"]);
+// Start Scheduling Jobs this is the *queue* manager, everything else is based on this guy's mad skills
+myRootRef.child("jobs").on('child_changed', function(childSnapshot) {
+    // Likely this will require revision, cause well I just did most of it in github's editor
+    if (childSnapshot.val() != null) {
+        for (var key in childSnapshot.val()) {
+            var x = childSnapshot.val()[key];
+            if (myRootRef != null) {
+                
+                var schedule = new Date(x["date"]).getTime();
+                if (old(x["date"].getTime(), x["length"])){
+                    myRootRef.child("jobs").child(key).remove();
+                    //console.log("old Show");
                 }
-
-
-            });
-
-        });
-
-    });
+                else{
+                    if duplicate(x["id"]){
+                        myRootRef.child("jobs").child(key).remove();
+                        //console.log("duplicate Show");
+                    }
+                    else
+                    {
+                       dvr.schedule(new Date(x["date"]), myRootRef, x["channel"], x["length"], x["title"], x["id"]);
+                    }
+                }
+            } else {
+                console.log("Ref is null");
+            }
+        }
+        
+    } else {
+        console.log("No Outstanding Jobs Left To Schedule");
+    }
 
 });
 
@@ -99,6 +77,30 @@ myRootRef.on('child_changed', function(childSnapshot, prevChildName) {
         
     }
 });
+
+// Here we get the tv guide result, then we find shows we want to queue for watching,
+// You can queue any valid show, but the scheduler will remove shows that are duplicate ids
+// Also this should be re-arranged, so whenever the recurring list changes we get the tv guide results.
+// then we queue up the shows we want to watch
+    myRootRef.child("recurring").on('child_changed', function(childSnapshot) {
+        childSnapshot.forEach(function(dataSnapshot) {
+            var key = dataSnapshot.val(); // key will be "fred"
+            tvguide.find(tvguide.lineup(), key["search"], function(_shows) {
+                for (item in _shows) {
+                    data = _shows[item];
+                    var date = new Date(data["year"], data["month"], data["day"], data["hh"], data["mm"], 0);
+                    self.queue(date, data["program"], data["length"], data["title"], data["id"]);
+                }
+
+            });
+
+        });
+
+    });
+    
+module.exports = {
+start: function() {
+
 
         // The scheduler should have a "conflict resolution"
     tuner: function(date, duration){
@@ -200,22 +202,14 @@ myRootRef.on('child_changed', function(childSnapshot, prevChildName) {
         }
     },
     // Scheduler file.
-    cleanup_jobs : function(){
-     myRootRef.child('jobs').once('value', function(snapshot){
-         
-         snapshot.forEach(function(res){
-           var data = res.val();
+    old : function(date, length){
            var today = new Date().getTime();
-           var job = data["date"] + data["length"]; //new Date(data["date"] + data["length"]);
+           var job = date + length; //new Date(data["date"] + data["length"]);
            // Remove OLD Shows
            if (today > job){
-              console.log("Removing Job" + data["title"] + "@" + new Date(data["date"]));
-              myRootRef.child(res.key()).remove();
+              return true;
            }
-
-      });
-    });
-    }
+    },
     
 
         
