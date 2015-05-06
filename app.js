@@ -7,8 +7,8 @@ var tvguide = require('./tvguide');
 var myRootRef = new Firebase(FB_URL);
 var dvr = require('./dvr')
 
-// This should be a "start" and that is about all this file should do I think... right?
-dvr.initialize();
+
+dvr.start(); // is a "start" even necessary?
 
 
 // Wondering if there should be a firebase function or something where all these "once's" reside.
@@ -30,36 +30,6 @@ var key = dataSnapshot.val(); // key will be "fred"
     });
 });
 
-// This should be moved to a 'scheduler', in theory we run through the jobs once, then when the snapshot changes we can re-assess whether we should schedule another.
-myRootRef.child("jobs").once('child_changed', function(childSnapshot) {
-     // This needs to be re-worked
-/*
-     if (childSnapshot.val() != null){
-         for (var key in childSnapshot.val()){
-           var x = childSnapshot.val()[key];
-           if (myRootRef != null){
-              var Today = new Date().getTime();
-              var schedule = new Date(x["date"]).getTime();
-              if (schedule + (x["length"] * 1000) > Today){
-                 dvr.schedule(new Date(x["date"]), myRootRef, x["channel"], x["length"], x["title"], x["id"]);
-              }
-              else{
-                 myRootRef.child("jobs").child(key).remove();
-                 console.log("old Show");
-              }
-           }
-           else{
-              console.log("Ref is null");
-          }
-        }
-       dvr.cleanup_jobs();
-     }
-     else{
-       console.log("No Outstanding Jobs Left To Schedule");
-     }
-     */
-});
-
 // add loop to schedule when starting up.
 
 // When we see that a commanded record has taken place we should do something about it. 
@@ -79,8 +49,7 @@ myRootRef.on('child_changed', function(childSnapshot, prevChildName) {
         // I'm open to new names but this will be sufficient for now
         dvr.queue(date, data["program"], data["length"], data["title"], data["id"]);
         // Scheduling only occurs and is controlled by the "job scheduler"
-        //dvr.schedule(date, localref, data["program"], data["length"], data["title"], data["id"]);
-
+        
     }
 });
 
