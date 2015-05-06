@@ -62,3 +62,25 @@ var key = dataSnapshot.val(); // key will be "fred"
             });
     });
 });
+
+
+// Schedule Record Now. This should be a function? 
+myRootRef.on('child_changed', function(childSnapshot, prevChildName) {
+    // code to handle child data changes.
+    var data = childSnapshot.val();
+    var localref = childSnapshot.ref();
+    if (data["commanded"] == "new") {
+        localref.update({
+            "commanded": "waiting"
+        });
+        var date = new Date(data["year"], data["month"], data["day"], data["hh"], data["mm"], 0);
+
+        console.log("New Schedule Added " + data["title"] + " @");
+        console.log(date);
+        // queue in this case means we need to make sure we keep track of all our recordings
+        // I'm open to new names but this will be sufficient for now
+        dvr.queue(date, data["program"], data["length"], data["title"], data["id"]);
+        // Scheduling only occurs and is controlled by the "job scheduler"
+        
+    }
+});
