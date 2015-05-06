@@ -100,18 +100,4 @@ function onComplete() {
     process.exit();
 }
 
-// Scheduler file.
-function conflict(time1, duration1, time2, duration2){
-   if ((time1 < time2) && (time2 < time1 + duration1)){
-      return true;
-   }
-   if ((time2 < time1) && (time1 < time2 + duration2)){
-      // so we've found a conflict
-      return true;
-   }
-   if (time1 == time2){
-      return true;
-   }
 
-   return false;
-}
