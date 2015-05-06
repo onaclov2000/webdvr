@@ -17,18 +17,6 @@ module.exports = {
         self.channels();
         scheduler.start();
 
-
-        
-// This I am not sure where it should remain, but should be in a 'disk manager' probably
-                   disk.time(function(res){
-                      myRootRef.update({
-                         "time_remaining": res
-                      });
-                   });         
-      // this is where we are scheduling recurring stuff again...this is crazy. TOO MUCH I TELL YOU.
-      // first time let's make sure we have a legit listing
-        
-
         console.log("Done Initializing");
     },
     channels : function(){
