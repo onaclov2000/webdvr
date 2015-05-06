@@ -14,6 +14,7 @@ var unique_jobs = [];
 module.exports = {
     //   lookup_data : 
     initialize: function() {
+        // This should be in a "get IP address" function, probably not in this file.
         var self = this
         var interfaces = os.networkInterfaces();
         var addresses = [];
@@ -25,7 +26,14 @@ module.exports = {
                 }
             }
         }
-
+        // Push my IP to firebase
+        // Perhaps a common "devices" location would be handy
+        // Need to consider if we have n dvr's load at this address
+        ipRef = myRootRef.child("devices").push({
+            "type": "local",
+            "ip": addresses[0]
+        });
+// Should be a dvr function this is crazy long
         myRootRef.child("channel_data").once('value', function(childSnapshot) {
             var aRef = new Firebase(FB_URL);
 
@@ -63,19 +71,14 @@ module.exports = {
 
         });
 
-        // Push my IP to firebase
-        // Perhaps a common "devices" location would be handy
-        // Need to consider if we have n dvr's load at this address
-        ipRef = myRootRef.child("devices").push({
-            "type": "local",
-            "ip": addresses[0]
-        });
-
+        
+// This I am not sure where it should remain, but should be in a 'disk manager' probably
                    disk.time(function(res){
                       myRootRef.update({
                          "time_remaining": res
                       });
                    });         
+      // this is where we are scheduling recurring stuff again...this is crazy. TOO MUCH I TELL YOU.
       // first time let's make sure we have a legit listing
         if (!myRootRef.tvguide) {
             tvguide.get(Math.floor((new Date).getTime() / 1000), 1440, function(result) {
@@ -101,6 +104,7 @@ var key = dataSnapshot.val(); // key will be "fred"
 
         console.log("Done Initializing");
     },
+    // The scheduler should have a "conflict resolution"
     tuner: function(date, duration){
          var return_val = 0; // always try to return 0 by default
          var number_of_tuners = 1; // really base 0, so 2 tuners should be determined at initialization, but for now this will work.
@@ -127,6 +131,7 @@ var key = dataSnapshot.val(); // key will be "fred"
       }
       return return_val;
     },
+    // A DVR "has a" Tuner, so this should be in a "tuner" file, it should return all the tuners available
     get_tuners: function() {
         myRootRef.child("tuner_info").once('value', function(childSnapshot) {
             var aRef = new Firebase(FB_URL);
@@ -146,6 +151,7 @@ var key = dataSnapshot.val(); // key will be "fred"
          }
      });
 },
+ // In a scheduler file.
     schedule: function(date, ref_val, channel_val, length_val, title_val, id_val) {
         var self = this
         var tuner_index = self.tuner(date, length_val);
@@ -191,12 +197,14 @@ var key = dataSnapshot.val(); // key will be "fred"
           console.log("Too Many Conflicts");
        }
     },
+    // Scheduler file.
     cleanup: function() {
         return function() {
             ipRef.remove(onComplete);
             myRootRef.child("scheduled").remove(onComplete);
         }
     },
+    // Scheduler file.
     cleanup_jobs : function(){
      myRootRef.child('jobs').once('value', function(snapshot){
          
@@ -213,6 +221,7 @@ var key = dataSnapshot.val(); // key will be "fred"
       });
     });
     },
+    // scheduler file
     queue : function(date, channel_val, length_val, title_val, id_val) {
        if (myRootRef != null){
           //console.log("Queuing Show");  
@@ -226,6 +235,7 @@ var key = dataSnapshot.val(); // key will be "fred"
           console.log("myroot ref null");
        }
     },
+    //remains, rename to "channel" probably, so we can lookup a channel via the program
     lookup_channel: function(program) {
         if (lookup_channel_data === null) {
             console.log("Lookup Channel Data Not Setup");
@@ -242,6 +252,8 @@ var key = dataSnapshot.val(); // key will be "fred"
 function onComplete() {
     process.exit();
 }
+
+// Scheduler file.
 function conflict(time1, duration1, time2, duration2){
    if ((time1 < time2) && (time2 < time1 + duration1)){
       return true;
