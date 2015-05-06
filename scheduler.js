@@ -43,3 +43,22 @@ console.log("No Outstanding Jobs Left To Schedule");
 }
 */
 });
+
+// Wondering if there should be a firebase function or something where all these "once's" reside.
+myRootRef.child("recurring").once('value', function(childSnapshot) {
+childSnapshot.forEach(function(dataSnapshot) {
+var key = dataSnapshot.val(); // key will be "fred"
+            tvguide.shows(result, key["search"], function(_shows) {
+            console.log("Doing Recurring Search");
+        for (item in _shows){
+           data = _shows[item];
+           var date = new Date(data["year"], data["month"], data["day"], data["hh"], data["mm"], 0);
+           dvr.queue(date, data["program"], data["length"], data["title"], data["id"]);
+           // Scheduling should only occur in one place, not 20 places here. We can *queue* something, but not schedule over and over
+           //dvr.schedule(date, myRootRef, data["program"], data["length"], data["title"], data["id"]);
+        }
+});
+});
+            });
+    });
+});
