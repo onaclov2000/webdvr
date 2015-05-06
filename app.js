@@ -10,17 +10,6 @@ var dvr = require('./dvr')
 // This should be a "start" and that is about all this file should do I think... right?
 dvr.initialize();
 
-// This should be moved to a scheduler
-var rule = new schedule.RecurrenceRule();
-rule.hour = 11;
-rule.minute = 59;
-var j = schedule.scheduleJob(rule, function() {
-    // I picked 25 hours as my rotation, this way I get enough coverage each night at midnight, to cover into the next morning a hair.
-    tvguide.get(Math.floor((new Date).getTime() / 1000), 1500, function(result) {
-        myRootRef.update({
-            "tvguide": result
-        });
-
 
 // Wondering if there should be a firebase function or something where all these "once's" reside.
 myRootRef.child("recurring").once('value', function(childSnapshot) {
