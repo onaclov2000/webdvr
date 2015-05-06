@@ -13,32 +13,15 @@ var scheduled_jobs = [];
 var unique_jobs = [];
 module.exports = {
     //   lookup_data : 
-    initialize: function() {
-        // This should be in a "get IP address" function, probably not in this file.
-        var self = this
-        var interfaces = os.networkInterfaces();
-        var addresses = [];
-        for (k in interfaces) {
-            for (k2 in interfaces[k]) {
-                var address = interfaces[k][k2];
-                if (address.family == 'IPv4' && !address.internal) {
-                    addresses.push(address.address)
-                }
-            }
-        }
-        // Push my IP to firebase
-        // Perhaps a common "devices" location would be handy
-        // Need to consider if we have n dvr's load at this address
-        ipRef = myRootRef.child("devices").push({
-            "type": "local",
-            "ip": addresses[0]
-        });
+    start: function() {
+        
 // Should be a dvr function this is crazy long
         myRootRef.child("channel_data").once('value', function(childSnapshot) {
             var aRef = new Firebase(FB_URL);
 
             if (childSnapshot.val() === null) {
                 console.log("Gathering Tuner Scan Results");
+                // TODO, The TUNER should be found programmatically.
                 result = spawn('hdhomerun_config', ["103DA852", "scan", "/tuner0"]);
                 var temp_data = "";
                 result.stdout.on('data', function(data) {
@@ -80,27 +63,7 @@ module.exports = {
                    });         
       // this is where we are scheduling recurring stuff again...this is crazy. TOO MUCH I TELL YOU.
       // first time let's make sure we have a legit listing
-        if (!myRootRef.tvguide) {
-            tvguide.get(Math.floor((new Date).getTime() / 1000), 1440, function(result) {
-                myRootRef.update({
-                    "tvguide": result
-                });
-myRootRef.child("recurring").once('value', function(childSnapshot) {
-childSnapshot.forEach(function(dataSnapshot) {
-var key = dataSnapshot.val(); // key will be "fred"
-            tvguide.shows(result, key["search"], function(_shows) {
-        for (item in _shows){
-           data = _shows[item];
-           var date = new Date(data["year"], data["month"], data["day"], data["hh"], data["mm"], 0);
-           self.queue(date, data["program"], data["length"], data["title"], data["id"]);
-           self.schedule(date, myRootRef, data["program"], data["length"], data["title"], data["id"]);
-        }
-            });
-});
-});
-            });
-
-        }
+        
 
         console.log("Done Initializing");
     },
