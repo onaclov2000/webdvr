@@ -1,3 +1,12 @@
+NOTE::::::
+EVERYTHING IS PROBABLY BROKEN RIGHT NOW>
+I SHOULD HAVE USED A BRANCH, BUT DIDN'T,
+You can find the last "working" version here:
+https://github.com/onaclov2000/webdvr/commit/6b02cc0d1b679a14d5aabc2a65880069c3337a2e
+
+However I am trying to make this a cleaner implmentation so you get stuck with it's current form.
+
+
 webdvr
 ======
 
