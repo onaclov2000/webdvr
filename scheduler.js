@@ -136,3 +136,51 @@ var key = dataSnapshot.val(); // key will be "fred"
       }
       return return_val;
     },
+
+
+ // In a scheduler file.
+    schedule: function(date, ref_val, channel_val, length_val, title_val, id_val) {
+        var self = this
+        var tuner_index = self.tuner(date, length_val);
+        //console.log("Schedule");
+        if (tuner_index > -1){
+           if (myRootRef != null){
+              myRootRef.child("scheduled").push({"date" : date.getTime(), "channel" : channel_val, "length" : length_val, "title" : title_val, "tuner" : tuner_index});
+           }
+           else{
+              console.log("myroot ref null");
+           }
+           scheduled_jobs.push({"date" : date.getTime(), "channel" : channel_val, "length" : length_val, "title" : title_val, "tuner" : tuner_index});
+           var j = schedule.scheduleJob(date, function(ref, channel, length, title, id, tuner) {
+              tvguide.get_name(id, function(result) {
+                   var filename = result;
+                   var info = self.lookup_channel(channel);
+                   ref.update({
+                       "state": "recording"
+                   });
+                   console.log("Recording title " + title + " for " + length / 60 + "minutes");
+                   record = spawn('./record.sh', [filename, info[0], info[1], length, tuner]);
+
+                   disk.time(function(res){
+                      ref.update({
+                         "time_remaining": res - (length / 3600)
+                      });
+                   });
+
+                   record.stdout.on('data', function(data) {
+                      console.log(data.toString());
+                   });
+
+                   record.on('close', function(code) {
+                      ref.update({
+                         "state": "waiting"
+                      });
+                   });
+               });
+           }.bind(null, ref_val, channel_val, length_val, title_val, id_val, tuner_index));
+       }
+       else{
+          // push to conflicts firebase location
+          console.log("Too Many Conflicts");
+       }
+    },
