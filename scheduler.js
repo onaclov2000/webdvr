@@ -4,10 +4,8 @@ var myRootRef = new Firebase(FB_URL);
 var schedule = require('node-schedule');
 var tvguide = require('./tvguide');
 var disk = require('./disk');
-module.exports = {
-start: function() {
 
-// This should be moved to a scheduler
+// Begin our scheduling upon instantiation?
 var rule = new schedule.RecurrenceRule();
 rule.hour = 11;
 rule.minute = 59;
@@ -19,6 +17,11 @@ var j = schedule.scheduleJob(rule, function() {
         });
 
 }
+
+module.exports = {
+start: function() {
+
+
 
 // This should be moved to a 'scheduler', in theory we run through the jobs once, then when the snapshot changes we can re-assess whether we should schedule another.
 myRootRef.child("jobs").once('child_changed', function(childSnapshot) {
