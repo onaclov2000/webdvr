@@ -3,8 +3,24 @@
 
 var http = require("http");
 var sanitize = require("sanitize-filename")
+var UPDATE_FREQUENCY = require('./config').UPDATE_FREQUENCY;
+
 
 module.exports = {
+	start: function(){
+	var rule = new schedule.RecurrenceRule();
+rule.hour = UPDATE_FREQUENCY.hour;
+rule.minute = UPDATE_FREQUENCY.minute;
+var j = schedule.scheduleJob(rule, function() {
+// I picked 25 hours as my rotation, this way I get enough coverage each night at midnight, to cover into the next morning a hair.
+tvguide.get(Math.floor((new Date).getTime() / 1000), 1500, function(result) {
+myRootRef.update({
+"tvguide": result
+});
+}	
+		
+		
+	},
     get: function(date, length, callback) {
         var start = date;
         console.log("Retrieving Channel Data from TV Guide");
