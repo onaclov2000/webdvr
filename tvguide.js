@@ -3,17 +3,16 @@
 
 var http = require("http");
 var sanitize = require("sanitize-filename")
-var UPDATE_FREQUENCY = require('./config').UPDATE_FREQUENCY;
-
+var CONFIG = require('./config');
 
 module.exports = {
 	start: function(){
 	var rule = new schedule.RecurrenceRule();
-rule.hour = UPDATE_FREQUENCY.hour;
-rule.minute = UPDATE_FREQUENCY.minute;
+rule.hour = CONFIG.UPDATE_FREQUENCY.hour;
+rule.minute = CONFIG.UPDATE_FREQUENCY.minute;
 var j = schedule.scheduleJob(rule, function() {
 // I picked 25 hours as my rotation, this way I get enough coverage each night at midnight, to cover into the next morning a hair.
-tvguide.get(Math.floor((new Date).getTime() / 1000), UPDATE_FREQUENCY.duration, function(result) {
+tvguide.get(Math.floor((new Date).getTime() / 1000), CONFIG.UPDATE_FREQUENCY.duration, function(result) {
 myRootRef.update({
 "tvguide": result
 });
@@ -27,7 +26,7 @@ myRootRef.update({
         var options = {
             host: 'mobilelistings.tvguide.com',
             port: 80,
-            path: '/Listingsweb/ws/rest/schedules/20385.268435456/start/' + start + '/duration/' + length + '?ChannelFields=Name%2CFullName%2CNumber%2CSourceId&ScheduleFields=ProgramId%2CEndTime%2CStartTime%2CTitle%2CAiringAttrib%2CCatId&formattype=json&disableChannels=music%2Cppv%2C24hr&inclchTypeMask=16'
+            path: '/Listingsweb/ws/rest/schedules/' + CONFIG.ANTENNA + '/start/' + start + '/duration/' + length + '?ChannelFields=Name%2CFullName%2CNumber%2CSourceId&ScheduleFields=ProgramId%2CEndTime%2CStartTime%2CTitle%2CAiringAttrib%2CCatId&formattype=json&disableChannels=music%2Cppv%2C24hr&inclchTypeMask=16'
         };
 
         http.get(options, function(res) {
