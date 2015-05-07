@@ -13,7 +13,7 @@ rule.hour = UPDATE_FREQUENCY.hour;
 rule.minute = UPDATE_FREQUENCY.minute;
 var j = schedule.scheduleJob(rule, function() {
 // I picked 25 hours as my rotation, this way I get enough coverage each night at midnight, to cover into the next morning a hair.
-tvguide.get(Math.floor((new Date).getTime() / 1000), 1500, function(result) {
+tvguide.get(Math.floor((new Date).getTime() / 1000), UPDATE_FREQUENCY.duration, function(result) {
 myRootRef.update({
 "tvguide": result
 });
