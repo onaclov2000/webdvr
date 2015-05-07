@@ -1,22 +1,11 @@
-var FB_URL = require('./config').FB_URL;
+var CONFIG = require('./config');
 var Firebase = require('firebase');
-var myRootRef = new Firebase(FB_URL);
+var myRootRef = new Firebase(CONFIG.FB_URL);
 var schedule = require('node-schedule');
 var tvguide = require('./tvguide');
 var disk = require('./disk');
 
-// Begin our scheduling upon instantiation?
-var rule = new schedule.RecurrenceRule();
-rule.hour = 11;
-rule.minute = 59;
-var j = schedule.scheduleJob(rule, function() {
-    // I picked 25 hours as my rotation, this way I get enough coverage each night at midnight, to cover into the next morning a hair.
-    tvguide.get(Math.floor((new Date).getTime() / 1000), 1500, function(result) {
-        myRootRef.update({
-            "tvguide": result
-        });
 
-}
 
 // Remove our scheduled recordings until we re-schedule
 myRootRef.child("scheduled").remove(onComplete);
@@ -42,7 +31,7 @@ myRootRef.child("jobs").on('child_changed', function(childSnapshot) {
                     }
                     else
                     {
-                       dvr.schedule(new Date(x["date"]), myRootRef, x["channel"], x["length"], x["title"], x["id"]);
+                       self.schedule(new Date(x["date"]), myRootRef, x["channel"], x["length"], x["title"], x["id"]);
                     }
                 }
             } else {
@@ -134,6 +123,9 @@ start: function() {
  // In a scheduler file.
     schedule: function(date, ref_val, channel_val, length_val, title_val, id_val) {
         var self = this
+        date = new Date(date).getTime();
+        date = date - CONFIG.RECORD_PADDING.before;
+        length_val = length_val + CONFIG.RECORD_PADDING.before + CONFIG.RECORD_PADDING.after;
         var tuner_index = self.tuner(date, length_val);
         //console.log("Schedule");
         if (tuner_index > -1){
