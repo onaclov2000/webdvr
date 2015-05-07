@@ -18,10 +18,8 @@ angular.module('myApp', ['firebase'])
             };
 
             $scope.record = function(element, parent) {
-                // always start recording about 2 minutes before   
-                var scheduledDate = new Date((element.StartTime - 120) * 1000);
-                // always record 2 minutes before and 2 minutes after approx
-                var duration = (element.EndTime - element.StartTime) + 240;
+                var scheduledDate = new Date(element.StartTime);
+                var duration = (element.EndTime - element.StartTime);
 
 
                 // this should send the good stuff
