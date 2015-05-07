@@ -124,8 +124,8 @@ start: function() {
     schedule: function(date, ref_val, channel_val, length_val, title_val, id_val) {
         var self = this
         date = new Date(date).getTime();
-        date = date - CONFIG.RECORD_PADDING.before;
-        length_val = length_val + CONFIG.RECORD_PADDING.before + CONFIG.RECORD_PADDING.after;
+        date = date - CONFIG.RECORD_PADDING.before * 1000; // Confirm that I need to multiply by 1000, but I'm pretty sure I do
+        length_val = length_val + CONFIG.RECORD_PADDING.before * 1000 + CONFIG.RECORD_PADDING.after * 1000;
         var tuner_index = self.tuner(date, length_val);
         //console.log("Schedule");
         if (tuner_index > -1){
