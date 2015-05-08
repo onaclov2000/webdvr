@@ -10,7 +10,7 @@ var dvr = require('./dvr')
 
 dvr.start(); // is a "start" even necessary?
 
-
+/*
 // Do something when app is closing
 process.on('exit', dvr.cleanup());
 
@@ -27,3 +27,4 @@ process.on('uncaughtException', function(err) {
   console.error(err.stack);
   dvr.cleanup();
 });
+*/
