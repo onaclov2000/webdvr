@@ -248,10 +248,9 @@ var tuner = function(date, duration) {
 }
 
 var duplicate = function(id) {
-    console.log(job_list);
-    console.log(id);
+
     if (job_list.indexOf(id) > -1) {
-        console.log("duplicate");
+        console.log("duplicate " + id);
         return true;
     }
     job_list.push(id);
