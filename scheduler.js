@@ -5,16 +5,18 @@ var tvguide = require('./tvguide');
 var schedule = require('node-schedule');
 var job_list = [];
 var scheduled_jobs = [];
+var _recurring = [];
 var start = function(res) {
     // Remove our scheduled recordings until we re-schedule
     myRootRef.child("scheduled").remove(function() {
         console.log("Scheduled Removed");
         // Start Jobs monitor, this is the *queue* manager
         console.log("Queue Manager Started");
-        myRootRef.child("jobs").on('value', function(childSnapshot) {
+        myRootRef.child("jobs").on('child_added', function(childSnapshot) {
+//            console.log("jobs" + childSnapshot.val());
             if (childSnapshot.val() != null) {
                 console.log("New Job");
-                schedule_queue(childSnapshot.val(), function() {}); // Jobs FB
+                schedule_queue(childSnapshot.val(), childSnapshot.key(), function() {}); // Jobs FB
             }
 
         });
@@ -32,12 +34,41 @@ var start = function(res) {
 
     }); // Schedule Removed
 
-}
 
+
+/*
+    myRootRef.child("tvguide").on('child_changed', function(childSnapshot, previousChanged) {
+            for (element in _recurring){       
+            tvguide.lineup(CONFIG.UPDATE_FREQUENCY.duration, function(results){
+               tvguide.find(results, element, function(_shows) {
+                  add_queue(_shows);
+               });
+            });
+           }
+        res("SUCCESS");
+    });
+*/
+    var rule = new schedule.RecurrenceRule();
+    rule.hour = CONFIG.UPDATE_FREQUENCY.hour;
+    rule.minute = CONFIG.UPDATE_FREQUENCY.minute;
+    var j = schedule.scheduleJob(rule, function() {
+        for (element in _recurring){
+          tvguide.lineup(CONFIG.UPDATE_FREQUENCY.duration, function(results){
+              tvguide.find(results, element, function(_shows) {
+                 add_queue(_shows);
+              });
+            });
+        }
+    });
+
+
+}
+/*
 var schedule_queue = function(jobs, res) {
     for (var key in jobs) {
+        console.log("Key " + key);
         var x = jobs[key];
-        console.log(jobs[key]["date"]);
+        //console.log("Schedule_QUEUE" + jobs[key]);
         var date = new Date(jobs[key]["date"]).getTime();
         if (old(date, jobs[key]["length"]) || duplicate(jobs[key]["id"])) {
             //console.log("Removing" + key);
@@ -50,6 +81,24 @@ var schedule_queue = function(jobs, res) {
         }
     }
     jobs_list = [];
+}
+*/
+
+
+var schedule_queue = function(jobs, key, res) {
+
+        //console.log("Schedule_QUEUE" + jobs[key]);
+        var date = new Date(jobs["date"]).getTime();
+        if (old(date, jobs["length"]) || duplicate(jobs["id"])) {
+            //console.log("Removing" + key);
+            myRootRef.child("jobs").child(key).remove();
+        } else {
+            tvguide.name(jobs["id"], function(result) {
+                scheduled(new Date(jobs["date"]), myRootRef, jobs["channel"], jobs["length"], jobs["title"], jobs["id"], result);
+                res("Success");
+            });
+        }
+    
 }
 
 var on_demand = function(res) {
@@ -142,6 +191,9 @@ var recurring = function(res) {
         console.log("Recurring");
         childSnapshot.forEach(function(dataSnapshot) {
             var key = dataSnapshot.val();
+            if (_recurring.indexOf(key["search"]) == -1){
+               _recurring.push(key["search"]);   
+            }
             tvguide.lineup(CONFIG.UPDATE_FREQUENCY.duration, function(results){
             tvguide.find(results, key["search"], function(_shows) {
                add_queue(_shows);

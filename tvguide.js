@@ -134,7 +134,7 @@ var sanatize_name = function(program, res) {
             res(sanitize(program["episode_title"]).replace(/ /g, "_"));
             return;
         } else {
-            res(sanitize(program["title"]).replace(/ /g, "_"));
+            res(sanitize(program["title"]).replace(/ /g, "_") + "." + new Date().getTime());
             return;
         }
     }
