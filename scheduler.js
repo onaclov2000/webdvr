@@ -3,9 +3,11 @@ var Firebase = require('firebase');
 var myRootRef = new Firebase(CONFIG.FB_URL);
 var tvguide = require('./tvguide');
 var schedule = require('node-schedule');
+var tuner = require('./tuner');
 var job_list = [];
 var scheduled_jobs = [];
 var _recurring = [];
+
 var start = function(res) {
     // Remove our scheduled recordings until we re-schedule
     myRootRef.child("scheduled").remove(function() {
@@ -15,7 +17,7 @@ var start = function(res) {
         myRootRef.child("jobs").on('child_added', function(childSnapshot) {
 //            console.log("jobs" + childSnapshot.val());
             if (childSnapshot.val() != null) {
-                console.log("New Job");
+                //console.log("New Job");
                 schedule_queue(childSnapshot.val(), childSnapshot.key(), function() {}); // Jobs FB
             }
 
@@ -23,6 +25,7 @@ var start = function(res) {
             console.log("Recurring Manager Started");
             // Start Recurring monitor, this is the repeated *search* manager
             recurring(function(result) {
+
 
             }); // Recurring
 
@@ -35,31 +38,17 @@ var start = function(res) {
     }); // Schedule Removed
 
 
-
-/*
     myRootRef.child("tvguide").on('child_changed', function(childSnapshot, previousChanged) {
             for (element in _recurring){       
             tvguide.lineup(CONFIG.UPDATE_FREQUENCY.duration, function(results){
                tvguide.find(results, element, function(_shows) {
+                  console.log("SHOWS" + _shows);
                   add_queue(_shows);
                });
             });
            }
-        res("SUCCESS");
     });
-*/
-    var rule = new schedule.RecurrenceRule();
-    rule.hour = CONFIG.UPDATE_FREQUENCY.hour;
-    rule.minute = CONFIG.UPDATE_FREQUENCY.minute;
-    var j = schedule.scheduleJob(rule, function() {
-        for (element in _recurring){
-          tvguide.lineup(CONFIG.UPDATE_FREQUENCY.duration, function(results){
-              tvguide.find(results, element, function(_shows) {
-                 add_queue(_shows);
-              });
-            });
-        }
-    });
+
 
 
 }
@@ -122,7 +111,7 @@ var schedule_on_demand = function(data, localref, res) {
         var date = new Date(data["year"], data["month"], data["day"], data["hh"], data["mm"], 0);
 
         console.log("New Schedule Added " + data["title"] + " @");
-        console.log(date.getTime());
+//        console.log(date.getTime());
         // queue in this case means we need to make sure we keep track of all our recordings
         // I'm open to new names but this will be sufficient for now
         queue(date.getTime(), data["program"], data["length"], data["title"], data["id"]);
@@ -153,7 +142,8 @@ var scheduled = function(date, ref_val, channel_val, length_val, title_val, id_v
             "title": title_val,
             "tuner": tuner_index
         });
-        var j = schedule.scheduleJob(date, function(ref, channel, length, title, id, tuner, filename) {
+//        console.log(date);
+        var j = schedule.scheduleJob(new Date(date), function(ref, channel, length, title, id, tuner, filename) {
             create_scheduled_recording(ref, channel, length, title, id, tuner, filename);
         }.bind(null, ref_val, channel_val, length_val, title_val, id_val, tuner_index, name));
     } else {
@@ -166,7 +156,7 @@ var create_scheduled_recording = function(ref, channel, length, title, id, tuner
     var info = tuner.channel(channel);
     console.log("Recording title " + title + " for " + length / 60 + "minutes");
     record = spawn('./record.sh', [filename, info[0], info[1], length, tuner]);
-
+    
     disk.time(function(res) {
         ref.update({
             "time_remaining": res - (length / 3600)
@@ -206,7 +196,7 @@ var recurring = function(res) {
 }
 var add_queue = function(shws) {
     for (item in shws) {
-        console.log(shws[item]);
+        //console.log(shws[item]);
         data = shws[item];
         var date = "";
         var program = "";
@@ -250,7 +240,7 @@ var tuner = function(date, duration) {
 var duplicate = function(id) {
 
     if (job_list.indexOf(id) > -1) {
-        console.log("duplicate " + id);
+//        console.log("duplicate " + id);
         return true;
     }
     job_list.push(id);
@@ -262,7 +252,7 @@ var old = function(date, length) {
     var job = date + length;
     // Remove OLD Shows
     if (today > job) {
-        console.log("old");
+//        console.log("old");
         return true;
     }
     return false;
