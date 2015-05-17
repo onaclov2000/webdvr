@@ -55,11 +55,12 @@ var get = function(date, length, callback) {
     // Need to remove duplicates
 var find = function(entire_listing, show, callback) {
     var res = [];
-    console.log(show);
+    console.log("Searching for show" + show);
     for (key in entire_listing) {
         // grab the index.
         for (item in entire_listing[key]["ProgramSchedules"]) {
             if (entire_listing[key]["ProgramSchedules"][item]["Title"].indexOf(show) > -1) {
+                console.log(entire_listing[key]["ProgramSchedules"][item]["Title"]);
                 startTime = entire_listing[key]["ProgramSchedules"][item]["StartTime"];
                 endTime = entire_listing[key]["ProgramSchedules"][item]["EndTime"];
                 var scheduledDate = new Date((startTime - 120) * 1000);

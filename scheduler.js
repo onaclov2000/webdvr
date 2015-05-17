@@ -40,8 +40,10 @@ var start = function(res) {
 
     myRootRef.child("tvguide").on('child_changed', function(childSnapshot, previousChanged) {
             for (element in _recurring){       
+            console.log(element);
             tvguide.lineup(CONFIG.UPDATE_FREQUENCY.duration, function(results){
-               tvguide.find(results, element, function(_shows) {
+               
+               tvguide.find(results, _recurring[element], function(_shows) {
                   console.log("SHOWS" + _shows);
                   add_queue(_shows);
                });
@@ -52,26 +54,6 @@ var start = function(res) {
 
 
 }
-/*
-var schedule_queue = function(jobs, res) {
-    for (var key in jobs) {
-        console.log("Key " + key);
-        var x = jobs[key];
-        //console.log("Schedule_QUEUE" + jobs[key]);
-        var date = new Date(jobs[key]["date"]).getTime();
-        if (old(date, jobs[key]["length"]) || duplicate(jobs[key]["id"])) {
-            //console.log("Removing" + key);
-            myRootRef.child("jobs").child(key).remove();
-        } else {
-            tvguide.name(jobs[key]["id"], function(result) {
-                scheduled(new Date(jobs[key]["date"]), myRootRef, jobs[key]["channel"], jobs[key]["length"], jobs[key]["title"], jobs[key]["id"], result);
-                res("Success");
-            });
-        }
-    }
-    jobs_list = [];
-}
-*/
 
 
 var schedule_queue = function(jobs, key, res) {
@@ -79,10 +61,11 @@ var schedule_queue = function(jobs, key, res) {
         //console.log("Schedule_QUEUE" + jobs[key]);
         var date = new Date(jobs["date"]).getTime();
         if (old(date, jobs["length"]) || duplicate(jobs["id"])) {
-            //console.log("Removing" + key);
+            console.log("Removing" + jobs["title"]);
             myRootRef.child("jobs").child(key).remove();
         } else {
             tvguide.name(jobs["id"], function(result) {
+                console.log("Scheduled" + jobs["title"]);
                 scheduled(new Date(jobs["date"]), myRootRef, jobs["channel"], jobs["length"], jobs["title"], jobs["id"], result);
                 res("Success");
             });
@@ -105,16 +88,18 @@ var on_demand = function(res) {
 
 var schedule_on_demand = function(data, localref, res) {
     if (data["commanded"] == "new") {
+        console.log("See New");
         localref.update({
             "commanded": "waiting"
         });
-        var date = new Date(data["year"], data["month"], data["day"], data["hh"], data["mm"], 0);
+        var date = new Date(data["date"]);
 
         console.log("New Schedule Added " + data["title"] + " @");
-//        console.log(date.getTime());
+        console.log(date);
         // queue in this case means we need to make sure we keep track of all our recordings
         // I'm open to new names but this will be sufficient for now
-        queue(date.getTime(), data["program"], data["length"], data["title"], data["id"]);
+        console.log("ON Demand Queued");
+        queue(data["date"], data["program"], data["length"], data["title"], data["id"]);
         // Scheduling only occurs and is controlled by the "job scheduler"
     }
 
@@ -125,7 +110,7 @@ var scheduled = function(date, ref_val, channel_val, length_val, title_val, id_v
     date = new Date(date).getTime();
     date = date - CONFIG.RECORD_PADDING.before * 1000; // Confirm that I need to multiply by 1000, but I'm pretty sure I do
     length_val = length_val + CONFIG.RECORD_PADDING.before * 1000 + CONFIG.RECORD_PADDING.after * 1000;
-    var tuner_index = tuner(date, length_val);
+    var tuner_index = tuner.conflict(date, length_val, scheduled_jobs);
     //console.log("Schedule");
     if (tuner_index > -1) {
         myRootRef.child("scheduled").push({
@@ -133,18 +118,23 @@ var scheduled = function(date, ref_val, channel_val, length_val, title_val, id_v
             "channel": channel_val,
             "length": length_val,
             "title": title_val,
-            "tuner": tuner_index
+            "id" : id_val,
+            "tuner": tuner_index,
+            "name" : name
         });
         scheduled_jobs.push({
             "date": date,
             "channel": channel_val,
             "length": length_val,
             "title": title_val,
-            "tuner": tuner_index
+            "id" : id_val,
+            "tuner": tuner_index,
+            "name" : name
         });
 //        console.log(date);
-        var j = schedule.scheduleJob(new Date(date), function(ref, channel, length, title, id, tuner, filename) {
-            create_scheduled_recording(ref, channel, length, title, id, tuner, filename);
+        var j = schedule.scheduleJob(new Date(date), function(ref, channel, length, title, id, tuner_i, filename) {
+           console.log("Create Scheduled Recording");
+            create_scheduled_recording(ref, channel, length, title, id, tuner_i, filename);
         }.bind(null, ref_val, channel_val, length_val, title_val, id_val, tuner_index, name));
     } else {
         // push to conflicts firebase location
@@ -152,21 +142,31 @@ var scheduled = function(date, ref_val, channel_val, length_val, title_val, id_v
     }
 }
 
-var create_scheduled_recording = function(ref, channel, length, title, id, tuner, filename) {
-    var info = tuner.channel(channel);
-    console.log("Recording title " + title + " for " + length / 60 + "minutes");
-    record = spawn('./record.sh', [filename, info[0], info[1], length, tuner]);
-    
-    disk.time(function(res) {
-        ref.update({
-            "time_remaining": res - (length / 3600)
-        });
-    });
+var create_scheduled_recording = function(ref, channel, length, title, id, tuner_index, filename) {
+    tuner.channel(function(channels){
+       console.log("Recording title " + title + " for " + length / 60 + "minutes");
+       console.log(channel);
+       console.log(channels[channel]);
+       record = spawn('./record.sh', [filename, channels[channel][0], channels[channel][1], length, tuner]);
+    var temp_data = "";
+    record.stdout.on('data', function(data) {
+      temp_data += data;
+     });
 
+     result.on('close', function(code) {
+        disk.time(function(res) {
+           ref.update({
+               "time_remaining": res
+           });
+        });
+   });
+    });
+    
 }
 
 // scheduler file
 var queue = function(date, channel_val, length_val, title_val, id_val) {
+    console.log("Queued " + title_val);
     myRootRef.child("jobs").push({
         "date": date,
         "channel": channel_val,
@@ -181,11 +181,15 @@ var recurring = function(res) {
         console.log("Recurring");
         childSnapshot.forEach(function(dataSnapshot) {
             var key = dataSnapshot.val();
+
             if (_recurring.indexOf(key["search"]) == -1){
                _recurring.push(key["search"]);   
             }
             tvguide.lineup(CONFIG.UPDATE_FREQUENCY.duration, function(results){
+            console.log("Show " + key["search"]);            
             tvguide.find(results, key["search"], function(_shows) {
+               console.log('Recurring Add Queue');
+               
                add_queue(_shows);
             });
             });
@@ -195,8 +199,9 @@ var recurring = function(res) {
 
 }
 var add_queue = function(shws) {
-    for (item in shws) {
-        //console.log(shws[item]);
+    
+     for (item in shws) {
+        console.log(shws[item]);
         data = shws[item];
         var date = "";
         var program = "";
@@ -207,35 +212,12 @@ var add_queue = function(shws) {
          date = new Date(data["year"], data["month"], data["day"], data["hh"], data["mm"], 0);
          program = data["program"];
         }
+        console.log("add_queue");
         queue(date, program, data["length"], data["title"], data["id"]);
     }
 
 }
 
-// The scheduler should have a "conflict resolution"
-var tuner = function(date, duration) {
-    var return_val = 0; // always try to return 0 by default
-    var number_of_tuners = 1; // really base 0, so 2 tuners should be determined at initialization, but for now this will work.
-    if (scheduled_jobs != null) {
-        //1. Look through all scheduled tasks and look for a date that is during the date time + duration (overlapping).
-        //1a. If none exists, then return 0
-        //1b. If only one exists, check the tuner identifier, if it's 0 return 1
-        //1b. If more than one exists, set fb/conflict list         
-        for (var key in scheduled_jobs) {
-            // If the scheduled job is before this job
-            if (conflict(scheduled_jobs[key]["date"], scheduled_jobs[key]["length"], date, duration)) {
-                // total conflicts - 1 means we have had more conflicts than tuners and have to fail
-                if (return_val == number_of_tuners - 1) {
-                    //we can't recover
-                    return -1;
-                } else {
-                    return_val++;
-                }
-            }
-        }
-    }
-    return return_val;
-}
 
 var duplicate = function(id) {
 

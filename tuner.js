@@ -130,6 +130,33 @@ var tune = function(tuner_index, tune_channel, tune_program) {
 
 }
 
+
+// The scheduler should have a "conflict resolution"
+var conflict = function(date, duration, scheduled_jobs) {
+    var return_val = 0; // always try to return 0 by default
+    var number_of_tuners = 1; // really base 0, so 2 tuners should be determined at initialization, but for now this will work.
+    if (scheduled_jobs != null) {
+        //1. Look through all scheduled tasks and look for a date that is during the date time + duration (overlapping).
+        //1a. If none exists, then return 0
+        //1b. If only one exists, check the tuner identifier, if it's 0 return 1
+        //1b. If more than one exists, set fb/conflict list         
+        for (var key in scheduled_jobs) {
+            // If the scheduled job is before this job
+            if (conflict(scheduled_jobs[key]["date"], scheduled_jobs[key]["length"], date, duration)) {
+                // total conflicts - 1 means we have had more conflicts than tuners and have to fail
+                if (return_val == number_of_tuners - 1) {
+                    //we can't recover
+                    return -1;
+                } else {
+                    return_val++;
+                }
+            }
+        }
+    }
+    return return_val;
+}
+
+
 module.exports = {
     name: name,
     count: count,

@@ -1,0 +1,184 @@
+
+app.js
+ #1 Expected ';' and instead saw 'var'.
+    var os = require('os') // Line 3, Pos 23
+ #2 Expected ';' and instead saw 'dvr'.
+    var dvr = require('./dvr') // Line 8, Pos 27
+
+config.js
+ #1 Expected 'FB_URL' at column 5, not column 4.
+    FB_URL : 'https://onaclovtech-home.firebaseio.com/dvr/', // full path to your Firebase URL, other config items will also fall into this in the future. // Line 2, Pos 4
+ #2 Expected 'UPDATE_FREQUENCY' at column 5, not column 4.
+    UPDATE_FREQUENCY : {hour : 11, minute : 59, duration : 1500}, //Default is 12 hour updates, with 25 hr duration // Line 3, Pos 4
+ #3 Expected 'ANTENNA' at column 5, not column 4.
+    ANTENNA : 20385.268435456, // EXPLAIN HOW TO GET THIS INFO, THIS IS YOUR LOCATION. // Line 4, Pos 4
+ #4 Expected 'RECORD_PADDING' at column 5, not column 4.
+    RECORD_PADDING : {before : 120, after : 120} // padding to record 2 minutes before and 2 minutes after // Line 5, Pos 4
+ #5 Expected ';' and instead saw '(end)'.
+    } // Line 6, Pos 2
+
+controller.js
+ #1 'angular' was used before it was defined.
+    angular.module('myApp', ['firebase']) // Line 1, Pos 1
+ #2 Expected exactly one space between 'function' and '('.
+    function($scope, $firebase) { // Line 3, Pos 17
+ #3 Missing 'use strict' statement.
+    var ref = new Firebase(''); // Line 4, Pos 13
+ #4 'Firebase' was used before it was defined.
+    var ref = new Firebase(''); // Line 4, Pos 27
+ #5 Combine this with the previous 'var' statement.
+    var regexref = new Firebase('/recurring'); // Line 5, Pos 17
+ #6 'Firebase' was used before it was defined.
+    var regexref = new Firebase('/recurring'); // Line 5, Pos 32
+ #7 Combine this with the previous 'var' statement.
+    var sync = $firebase(ref); // Line 6, Pos 17
+ #8 Combine this with the previous 'var' statement.
+    var resync = $firebase(regexref); // Line 7, Pos 17
+ #9 Expected exactly one space between 'function' and '('.
+    $scope.addRecurring = function(show){ // Line 15, Pos 43
+#10 Expected exactly one space between ')' and '{'.
+    $scope.addRecurring = function(show){ // Line 15, Pos 49
+#11 Expected exactly one space between 'function' and '('.
+    $scope.record = function(element, parent) { // Line 20, Pos 37
+#12 Combine this with the previous 'var' statement.
+    var duration = (element.EndTime - element.StartTime); // Line 22, Pos 21
+#13 Missing space between ',' and '-'.
+    program: parent.replace('.','-'), // Line 28, Pos 49
+#14 Expected ']' at column 9, not column 5.
+    ]); // Line 43, Pos 5
+
+disk.js
+ #1 Expected exactly one space between 'function' and '('.
+    time : function(result){ // Line 4, Pos 20
+ #2 Expected exactly one space between ')' and '{'.
+    time : function(result){ // Line 4, Pos 28
+ #3 Missing 'use strict' statement.
+    njds.drives( // Line 5, Pos 8
+ #4 Expected 'function' at column 13, not column 9.
+    function (err, drives) { // Line 6, Pos 9
+ #5 Expected 'njds' at column 17, not column 13.
+    njds.drivesDetail( // Line 7, Pos 13
+ #6 Expected 'drives' at column 21, not column 17.
+    drives, // Line 8, Pos 17
+ #7 Expected 'function' at column 21, not column 17.
+    function (err, data) { // Line 9, Pos 17
+ #8 Expected 'for' at column 25, not column 21.
+    for(var i = 0; i<data.length; i++) // Line 10, Pos 21
+ #9 Missing space between 'for' and '('.
+    for(var i = 0; i<data.length; i++) // Line 10, Pos 24
+#10 Move 'var' declarations to the top of the function.
+    for(var i = 0; i<data.length; i++) // Line 10, Pos 25
+#11 Stopping. (29% scanned).
+     // Line 10, Pos 25
+
+dvr.js
+ #1 Expected exactly one space between 'function' and '('.
+    var start = function() { // Line 5, Pos 21
+ #2 Missing 'use strict' statement.
+    tuner.start(function(res) { // Line 6, Pos 5
+ #3 Expected exactly one space between 'function' and '('.
+    tuner.start(function(res) { // Line 6, Pos 25
+ #4 Expected exactly one space between 'function' and '('.
+    tvguide.start(function(res) { // Line 8, Pos 31
+ #5 Expected exactly one space between 'function' and '('.
+    scheduler.start(function(res) { // Line 10, Pos 37
+ #6 Unexpected 'module'.
+    module.exports = { // Line 19, Pos 1
+ #7 Stopping. (86% scanned).
+     // Line 19, Pos 1
+
+scheduler.js
+ #1 Unexpected dangling '_' in '_recurring'.
+    var _recurring = []; // Line 9, Pos 5
+ #2 Expected exactly one space between 'function' and '('.
+    var start = function(res) { // Line 11, Pos 21
+ #3 Missing 'use strict' statement.
+    myRootRef.child("scheduled").remove(function() { // Line 13, Pos 5
+ #4 Expected exactly one space between 'function' and '('.
+    myRootRef.child("scheduled").remove(function() { // Line 13, Pos 49
+ #5 Expected exactly one space between 'function' and '('.
+    myRootRef.child("jobs").on('child_added', function(childSnapshot) { // Line 17, Pos 59
+ #6 Expected '!==' and instead saw '!='.
+    if (childSnapshot.val() != null) { // Line 19, Pos 37
+ #7 'schedule_queue' was used before it was defined.
+    schedule_queue(childSnapshot.val(), childSnapshot.key(), function() {}); // Jobs FB // Line 21, Pos 17
+ #8 Expected exactly one space between 'function' and '('.
+    schedule_queue(childSnapshot.val(), childSnapshot.key(), function() {}); // Jobs FB // Line 21, Pos 82
+ #9 Empty block.
+    schedule_queue(childSnapshot.val(), childSnapshot.key(), function() {}); // Jobs FB // Line 21, Pos 85
+#10 Expected 'console' at column 9, not column 13.
+    console.log("Recurring Manager Started"); // Line 25, Pos 13
+#11 Expected 'recurring' at column 9, not column 13.
+    recurring(function(result) { // Line 27, Pos 13
+#12 Expected exactly one space between 'function' and '('.
+    recurring(function(result) { // Line 27, Pos 31
+#13 Expected '}' at column 9, not column 13.
+    }); // Recurring // Line 30, Pos 13
+#14 Empty block.
+    recurring(function(result) { // Line 27, Pos 40
+#15 Unused 'result'.
+    recurring(function(result) { // Line 27, Pos 32
+#16 'on_demand' was used before it was defined.
+    on_demand(function() { // Line 34, Pos 9
+#17 Expected exactly one space between 'function' and '('.
+    on_demand(function() { // Line 34, Pos 27
+#18 Expected exactly one space between 'function' and '('.
+    myRootRef.child("tvguide").on('child_changed', function(childSnapshot, previousChanged) { // Line 41, Pos 60
+#19 Expected 'for' at column 9, not column 13.
+    for (element in _recurring){ // Line 42, Pos 13
+#20 'element' was used before it was defined.
+    for (element in _recurring){ // Line 42, Pos 18
+#21 Cannot read property 'kind' of undefined
+     // Line 42, Pos 26
+
+tuner.js
+ #1 Unexpected dangling '_' in '_name'.
+    var _name = ""; // Line 7, Pos 5
+ #2 Unexpected dangling '_' in '_count'.
+    var _count = -1; // Line 8, Pos 5
+ #3 Unexpected dangling '_' in '_channel'.
+    var _channel = ""; // Line 9, Pos 5
+ #4 Expected exactly one space between 'function' and '('.
+    var start = function(result) { // Line 11, Pos 21
+ #5 Missing 'use strict' statement.
+    name(function(res) { // Line 12, Pos 5
+ #6 Expected exactly one space between 'function' and '('.
+    name(function(res) { // Line 12, Pos 18
+ #7 'count' was used before it was defined.
+    count(function(res) { // Line 13, Pos 9
+ #8 Expected exactly one space between 'function' and '('.
+    count(function(res) { // Line 13, Pos 23
+ #9 'channel' was used before it was defined.
+    channel(function(res) { // Line 14, Pos 13
+#10 Expected exactly one space between 'function' and '('.
+    channel(function(res) { // Line 14, Pos 29
+#11 Unused 'res'.
+    channel(function(res) { // Line 14, Pos 30
+#12 Unused 'res'.
+    count(function(res) { // Line 13, Pos 24
+#13 Unused 'res'.
+    name(function(res) { // Line 12, Pos 19
+#14 Unexpected 'var'.
+    var name = function(return_value) { // Line 21, Pos 1
+#15 Stopping. (12% scanned).
+     // Line 21, Pos 1
+
+tvguide.js
+ #1 Expected exactly one space between 'function' and '('.
+    var start = function(res) { // Line 10, Pos 21
+ #2 Missing 'use strict' statement.
+    var rule = new schedule.RecurrenceRule(); // Line 11, Pos 5
+ #3 Combine this with the previous 'var' statement.
+    var j = schedule.scheduleJob(rule, function() { // Line 14, Pos 9
+ #4 Expected exactly one space between 'function' and '('.
+    var j = schedule.scheduleJob(rule, function() { // Line 14, Pos 48
+ #5 'lineup' was used before it was defined.
+    lineup(CONFIG.UPDATE_FREQUENCY.duration, function(res) { // Line 15, Pos 9
+ #6 Expected exactly one space between 'function' and '('.
+    lineup(CONFIG.UPDATE_FREQUENCY.duration, function(res) { // Line 15, Pos 58
+ #7 Expected 'res' at column 13, not column 12.
+    res("Success"); // Line 16, Pos 12
+ #8 Unexpected 'var'.
+    var lineup = function(duration, res) { // Line 23, Pos 1
+ #9 Stopping. (15% scanned).
+     // Line 23, Pos 1
