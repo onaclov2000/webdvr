@@ -1,11 +1,11 @@
 var FB_URL = require('./config').FB_URL;
 var Firebase = require('firebase');
-var os = require('os')
+var os = require('os');
 var spawn = require('child_process').spawn;
 var schedule = require('node-schedule');
 var tvguide = require('./tvguide');
 var myRootRef = new Firebase(FB_URL);
-var dvr = require('./dvr')
+var dvr = require('./dvr');
 
 
 dvr.start(); // is a "start" even necessary?

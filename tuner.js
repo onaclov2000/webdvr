@@ -162,5 +162,6 @@ module.exports = {
     count: count,
     channel: channel,
     tune: tune,
-    start: start
+    start: start,
+    conflict : conflict
 }

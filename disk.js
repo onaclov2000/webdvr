@@ -1,9 +1,9 @@
 var njds = require('nodejs-disks');
 module.exports = {
     //   lookup_data : 
-    time : function(result){
+    time : function (result){
        njds.drives(
-        function (err, drives) {
+            function (err, drives) {
             njds.drivesDetail(
                 drives,
                 function (err, data) {
