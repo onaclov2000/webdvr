@@ -15,7 +15,8 @@ var add = function (obj) {
 
     // expire the queue element (aka remove at predetermined time)
     setTimeout(function(val){
-       for (i=0; i < local_queue.length - 1; i++)
+       
+       for (i=0; i <= local_queue.length - 1; i++)
        {
           if (local_queue[i].endTime == val){
              local_queue.splice(i,1);
@@ -37,6 +38,7 @@ var remove = function(){
 }
 
 var element = function(){
+   // grab "head" of queue
    return local_queue[local_queue.length-1];
 }
 
