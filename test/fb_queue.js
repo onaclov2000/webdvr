@@ -1,24 +1,22 @@
-var queue = require('../queue');
+var queue = require('../fb_queue');
 var count = 1;
 var show = [];
 var startTime_val = new Date().getTime()
 var endTime_val_1 = startTime_val + 30 * 1000;
 
 // 0 element
-if (queue.element() == null){
-  console.log("Pass test " + count);
-  count = count + 1; 
-}
-else
-{
-   console.log("Fail test " + count);
-   count = count + 1;
-}
+//if (queue.element() == null){
+//  console.log("Pass test " + count);
+//  count = count + 1; 
+//}
+//else
+//{
+//   console.log("Fail test " + count);
+//   count = count + 1;
+//}
 // First Element Queue Value
-queue.add({startTime : startTime_val, channel : "channel", endTime : endTime_val_1, title : "title", id : "id"}, function(object){
-   console.log("I did it");
-});
-if (queue.element().endTime == endTime_val_1){
+queue.add({startTime : startTime_val, channel : "channel", endTime : endTime_val_1, title : "title", id : "id"});
+/*if (queue.element().endTime == endTime_val_1){
   console.log("Pass test " + count);
   count = count + 1;
 }
@@ -27,7 +25,7 @@ else
    console.log("Fail test " + count);
    count = count + 1;
 }
-
+/*
 var endTime_val_2 = startTime_val + 40 * 1000;
 var endTime_val_3 = startTime_val + 10 * 1000;
 queue.add({startTime : startTime_val, channel : "channel", endTime : endTime_val_2, title : "title", id : "id", key : "abcd"}, function(object){
@@ -107,4 +105,4 @@ setTimeout(function(result){
 },
 45 * 1000
 );
-
+*/

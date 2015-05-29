@@ -71,6 +71,8 @@ var find = function(entire_listing, show, callback) {
                     channel: entire_listing[key]["Channel"]["Number"].replace('.', '-'),
                     date : scheduledDate.getTime(),
                     length: duration,
+                    startTime : startTime * 1000,
+                    endTime : endTime * 1000,
                     id: entire_listing[key]["ProgramSchedules"][item]["ProgramId"],
                     title: entire_listing[key]["ProgramSchedules"][item]["Title"]
                 });
