@@ -5,7 +5,9 @@ var tvguide = require('./tvguide');
 var schedule = require('node-schedule');
 var tuner = require('./tuner');
 var queue = require('./fb_queue');
+var disk = require('./disk');
 var spawn = require('child_process').spawn;
+
 var job_list = [];
 var scheduled_jobs = [];
 var _recurring = [];
@@ -23,9 +25,14 @@ var duplicate = function(id) {
 };
 var old = function(date, length) {
     var today = new Date().getTime();
-    var job = (date) + (length);
+    
+    var job = parseInt(date) + parseInt(length)*1000;
+    console.log(date);
     // Remove OLD Shows
     if (today > job) {
+        console.log('old');
+        console.log(today);
+        console.log(job);
         return true;
     }
     return false;
@@ -39,6 +46,7 @@ var schedule_queue = function(jobs, key, res) {
     } else {
         tvguide.name(jobs.id, function(result) {
             console.log("Scheduled" + jobs.title + " " + new Date(jobs.date));
+            console.log(jobs);
             scheduled(new Date(jobs.date), myRootRef, jobs.channel, jobs.length, jobs.title, jobs.id, result);
             res("Success");
         });
@@ -67,11 +75,11 @@ var start = function(res) {
            }); // Recurring
         console.log("On Demand Manager Started");
         // Start On Demand monitor
-/*
+
         on_demand(function() {
             res("Success");
         }); // On Demand
-*/
+
     }); // Schedule Removed
 
 
@@ -101,6 +109,7 @@ var start = function(res) {
 var on_demand = function(res) {
     // Schedule Record Now. This should be a function? 
     myRootRef.on('child_changed', function(childSnapshot, prevChildName) {
+        
         // code to handle child data changes.
         var data = childSnapshot.val();
         var localref = childSnapshot.ref();
@@ -122,12 +131,8 @@ var schedule_on_demand = function(data, localref, res) {
         console.log("New Schedule Added " + data["title"] + " @");
         console.log(date);
         console.log("ON Demand Queued");
-        tuner.channel(function(result){
-           if (result[data.channel]){
-              queue.add(data);
-           }
-        });
-        // Scheduling only occurs and is controlled by the "job scheduler"
+        queue.add(data);
+       
     }
 
 
@@ -157,36 +162,34 @@ var scheduled = function(date, ref_val, channel_val, length_val, title_val, id_v
             "name": name
         });
         //        console.log(date);
-        var j = schedule.scheduleJob(new Date(date), function(ref, channel, length, title, id, tuner_i, filename) {
+        var j = schedule.scheduleJob(new Date(date), function(channel, length, title, id, tuner_i, filename) {
             console.log("Create Scheduled Recording");
-            create_scheduled_recording(ref, channel, length, title, id, tuner_i, filename);
-        }.bind(null, ref_val, channel_val, length_val, title_val, id_val, tuner_index, name));
+            create_scheduled_recording(channel, length, title, id, tuner_i, filename);
+        }.bind(null,channel_val, length_val, title_val, id_val, tuner_index, name));
     } else {
         // push to conflicts firebase location
         console.log("Too Many Conflicts");
     }
 }
 
-var create_scheduled_recording = function(ref, channel, length, title, id, tuner_index, filename) {
+var create_scheduled_recording = function(channel, length, title, id, tuner_index, filename) {
     tuner.channel(function(channels) {
-        console.log("Recording title " + title + " for " + length / 60 + "minutes");
+        console.log("Recording title " + title + " for " + length / 60 + " minutes");
         console.log(channel);
         console.log(channels[channel]);
-        record = spawn('./record.sh', [filename, channels[channel][0], channels[channel][1], length, tuner]);
+        record = spawn('./record.sh', [filename, channels[channel][0], channels[channel][1], length, tuner_index]);
         var temp_data = "";
-        record.stdout.on('data', function(data) {
+        record.on('data', function(data) {
             temp_data += data;
         });
 
-        result.on('close', function(code) {
+        record.on('close', function(code) {
+            console.log(temp_data);
             disk.time(function(res) {
-                ref.update({
-                    "time_remaining": res
-                });
+               console.log(res);
             });
         });
     });
-
 }
 
 
@@ -206,8 +209,9 @@ var recurring = function(res) {
                     console.log('Recurring Add Queue');
                     for (show in _shows){
                        tuner.channel(function(result){
-                          console.log(result[_shows[show].channel]);
+                          //console.log(result[_shows[show].channel]);
                           if (result[_shows[show].channel]){
+                             //console.log("Recorded Anyways");
                              queue.add(_shows[show]);
                           }
                        });
@@ -240,5 +244,6 @@ function conflict(time1, duration1, time2, duration2) {
 }
 
 module.exports = {
-    start: start
+    start: start,
+    create_scheduled_recording : create_scheduled_recording
 }

@@ -6,7 +6,8 @@ var CONFIG = require('./config');
 var schedule = require('node-schedule');
 var Firebase = require('firebase');
 var myRootRef = new Firebase(CONFIG.FB_URL);
-
+var filter = require('./filter');
+var tuner = require('./tuner');
 var start = function(res) {
     var rule = new schedule.RecurrenceRule();
     rule.hour = CONFIG.UPDATE_FREQUENCY.hour;
@@ -19,13 +20,43 @@ var start = function(res) {
     res("Success");
 }
 
+var provider = function(zip, callback){
+
+
+        var options = {
+            host: 'mobilelistings.tvguide.com',
+            port: 80,
+            path: '/Listingsweb/ws/rest/serviceproviders/zipcode/' + zip + '?formattype=json'
+        };
+        http.get(options, function(res) {
+            var str = "";
+            res.on('data', function(chunk) {
+                str += chunk;
+            });
+            res.on('end', function() {
+               var temp = JSON.parse(str);
+               for (element in temp)
+               {
+                 if temp[element].indexOf("broadcast") > -1){
+                    console.log(temp[element]);
+                 }
+               } 
+               callback();
+            });
+        });  
+}
+
 
 var lineup = function(duration, res) {
     get(Math.floor((new Date).getTime() / 1000), duration, function(result) {
-        myRootRef.update({
-            "tvguide": result
+        tuner.channel(function(chan){
+           var temp1 = filter.channels(chan, result);
+           var temp2 = filter.shows(temp1);
+           myRootRef.update({
+               "tvguide": temp2
+           });
+           res(temp2);
         });
-        res(result);
     });
 
     
