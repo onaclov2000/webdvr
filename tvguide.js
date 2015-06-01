@@ -3,23 +3,21 @@
 var http = require("http");
 var sanitize = require("sanitize-filename");
 var CONFIG = require('./config');
-var schedule = require('node-schedule');
 var Firebase = require('firebase');
 var myRootRef = new Firebase(CONFIG.FB_URL);
 var filter = require('./filter');
 var tuner = require('./tuner');
 var start = function(res) {
-    var rule = new schedule.RecurrenceRule();
-    rule.hour = CONFIG.UPDATE_FREQUENCY.hour;
-    rule.minute = CONFIG.UPDATE_FREQUENCY.minute;
-    var j = schedule.scheduleJob(rule, function() {
+    setInterval(function() {
         lineup(CONFIG.UPDATE_FREQUENCY.duration, function(res) {
-           res("Success");
+           console.log("Updated Lineup");
         });
-    });
+    }, 21600000);
     res("Success");
 }
 
+
+/*
 var provider = function(zip, callback){
 
 
@@ -46,7 +44,7 @@ var provider = function(zip, callback){
         });  
 }
 
-
+*/
 var lineup = function(duration, res) {
     get(Math.floor((new Date).getTime() / 1000), duration, function(result) {
         tuner.channel(function(chan){
