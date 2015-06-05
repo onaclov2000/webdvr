@@ -1,40 +1,38 @@
 var CONFIG = require('./config');
-var queue = require('./queue');
+var q = require('./queue');
+var queue = new q();
 var Firebase = require('firebase');
 var myRootRef = new Firebase(CONFIG.FB_URL);
-var child = "jobs";
-var add = function (obj) {
-   var key = myRootRef.child(child).push(obj);
+var add = function (self, obj) {
+   
+   var key = myRootRef.child(self.child).push(obj);
    obj.key = key.key();
-  
-      queue.add(obj, function(object){
+   console.log("fb_queue");
+  console.log(self.child);
+   console.log(obj);
+      console.log("fb_queue_end");
+      queue.add(obj, function(self, object){
          // The timer has gone off, so we should remove the element from firebase
         console.log("removing" + object.title);
-         myRootRef.child('job').child(object.key).remove();
-      });
+         myRootRef.child(self.child).child(object.key).remove();
+      }.bind(null, self));
 };
 
 
-var queue = function(child){
-   this.entire  = entire;
-   this.add     = add;
-   this.remove  = remove;
-   this.element = element;
-   this.child = child;
+var fb_queue = function(child) {
+    var self = this;
+    self.child = child;
+    var methods = {
+//        entire: function(){return entire(self)},
+        add: function(obj, res){return add(self, obj, res)},
+//        remove: function(){return remove(self)},
+//        element: function(){return element(self)}
+        getkey : self.child
+    };
 
-};
-module.exports = function(n){
-   return new queue(n);
-//   entire  : entire,
-//   add     : add,
-//   remove  : remove,
-//   element : element
+    return methods;
+
 }
-
-
-module.exports = {
-//   entire : entire,
-   add : add
-//   remove : remove,
-//   element : element
+module.exports = function(child) {
+    return new fb_queue(child);
 }

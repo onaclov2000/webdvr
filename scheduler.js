@@ -4,7 +4,9 @@ var myRootRef = new Firebase(CONFIG.FB_URL);
 var tvguide = require('./tvguide');
 var schedule = require('node-schedule');
 var tuner = require('./tuner');
-var queue = require('./fb_jobs_queue');
+var queue = require('./fb_queue');
+var fb_queue = new queue('jobs');
+var schedule_queue = new queue('scheduled');
 var disk = require('./disk');
 var spawn = require('child_process').spawn;
 
@@ -39,18 +41,14 @@ var old = function(date, length) {
 };
 
 
-var schedule_queue = function(jobs, key, res) {
-    if (old(jobs.date, jobs.length) || duplicate(jobs.id)) {
-        console.log("Removing" + jobs["title"]);
-        myRootRef.child("jobs").child(key).remove();
-    } else {
+var add_to_schedule_queue = function(jobs, key, res) {
         tvguide.name(jobs.id, function(result) {
             console.log("Scheduled" + jobs.title + " " + new Date(jobs.date));
             console.log(jobs);
-            scheduled(new Date(jobs.date), myRootRef, jobs.channel, jobs.length, jobs.title, jobs.id, result);
+            jobs.name = result;
+            scheduled(myRootRef, jobs);
             res("Success");
         });
-    }
 
 }
 
@@ -65,7 +63,7 @@ var start = function(res) {
             console.log("jobs" + childSnapshot.val());
             if (childSnapshot.val() !== null) {
                 //console.log("New Job");
-                schedule_queue(childSnapshot.val(), childSnapshot.key(), function() {}); // Jobs FB
+                add_to_schedule_queue(childSnapshot.val(), childSnapshot.key(), function() {}); // Jobs FB
             }
 
         });
@@ -94,7 +92,7 @@ var start = function(res) {
                        tuner.channel(function(result){
                           console.log(result[_shows[show].channel]);
                           if (result[_shows[show].channel]){
-                             queue.add(_shows[show]);
+                             fb_queue.add(_shows[show]);
                           }
                        });
                     }
@@ -131,53 +129,41 @@ var schedule_on_demand = function(data, localref, res) {
         console.log("New Schedule Added " + data["title"] + " @");
         console.log(date);
         console.log("ON Demand Queued");
-        queue.add(data);
+        fb_queue.add(data);
        
     }
 
 
 }
-var scheduled = function(date, ref_val, channel_val, length_val, title_val, id_val, name) {
-    date = new Date(date).getTime();
-    date = date - CONFIG.RECORD_PADDING.before; // Confirm that I need to multiply by 1000, but I'm pretty sure I do
-    length_val = length_val + CONFIG.RECORD_PADDING.before + CONFIG.RECORD_PADDING.after;
-    var tuner_index = tuner.conflict(date, length_val, scheduled_jobs);
-    if (tuner_index > -1) {
-        myRootRef.child("scheduled").push({
-            "date": date,
-            "channel": channel_val,
-            "length": length_val,
-            "title": title_val,
-            "id": id_val,
-            "tuner": tuner_index,
-            "name": name
-        });
-        scheduled_jobs.push({
-            "date": date,
-            "channel": channel_val,
-            "length": length_val,
-            "title": title_val,
-            "id": id_val,
-            "tuner": tuner_index,
-            "name": name
-        });
-        //        console.log(date);
-        var j = schedule.scheduleJob(new Date(date), function(channel, length, title, id, tuner_i, filename) {
+var scheduled = function(ref_val, job) {
+    job.date = new Date(job.date).getTime();
+    job.date = job.date - CONFIG.RECORD_PADDING.before; // Confirm that I need to multiply by 1000, but I'm pretty sure I do
+    job.length = job.length + CONFIG.RECORD_PADDING.before + CONFIG.RECORD_PADDING.after;
+    job.tuner_index = tuner.conflict(job.date, job.length, schedule_queue);
+    console.log("Finding End Time");
+    console.log(new Date(job.date));
+    job.endTime = job.date + (job.length);
+    console.log(new Date(job.endTime));
+    if (job.tuner_index > -1) {
+      
+        schedule_queue.add(job);
+
+        var j = schedule.scheduleJob(new Date(job.date), function(locjob) {
             console.log("Create Scheduled Recording");
-            create_scheduled_recording(channel, length, title, id, tuner_i, filename);
-        }.bind(null,channel_val, length_val, title_val, id_val, tuner_index, name));
+            create_scheduled_recording(locjob);
+        }.bind(null,job));
     } else {
         // push to conflicts firebase location
         console.log("Too Many Conflicts");
     }
 }
 
-var create_scheduled_recording = function(channel, length, title, id, tuner_index, filename) {
+var create_scheduled_recording = function(job) {
     tuner.channel(function(channels) {
-        console.log("Recording title " + title + " for " + length / 60 + " minutes");
-        console.log(channel);
-        console.log(channels[channel]);
-        record = spawn('./record.sh', [filename, channels[channel][0], channels[channel][1], length, tuner_index]);
+        console.log("Recording title " + job.title + " for " + job.length / 6000 + " minutes");
+        console.log(job.channel);
+        console.log(channels[job.channel]);
+        record = spawn('./record.sh', [job.name, channels[job.channel][0], channels[job.channel][1], job.length, job.tuner_index]);
         var temp_data = "";
         record.on('data', function(data) {
             temp_data += data;
@@ -212,7 +198,7 @@ var recurring = function(res) {
                           //console.log(result[_shows[show].channel]);
                           if (result[_shows[show].channel]){
                              //console.log("Recorded Anyways");
-                             queue.add(_shows[show]);
+                             fb_queue.add(_shows[show]);
                           }
                        });
                     }

@@ -10,7 +10,8 @@ var add = function(self, obj, res) {
                 // push to local queue
                 self.local_queue.push(obj);
                 // expire the queue element (aka remove at predetermined time)
-                
+                console.log("timeout");
+                console.log(obj.endTime - obj.startTime);
 				setTimeout(function(val) {
                         var obj;
                         for (i = 0; i <= self.local_queue.length - 1; i++) {
@@ -20,7 +21,7 @@ var add = function(self, obj, res) {
                                 val[1](obj);
                             }
                         }
-                    }, (obj.endTime - obj.startTime) + 10, [obj.endTime, res])
+                    }, ((obj.endTime - obj.startTime)*1000) + 10, [obj.endTime, res])
 					
                     // Sort Queue by end time by default.
                 self.local_queue.sort(sort.endTime);
@@ -34,7 +35,7 @@ var remove = function(self) {
     self.local_queue.splice(self.local_queue.length - 1, 1);
     return self.local_queue;
 }
-var element = function() {
+var element = function(self) {
     // grab "head" of queue
     return self.local_queue[self.local_queue.length - 1];
 }
