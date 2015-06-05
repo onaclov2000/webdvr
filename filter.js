@@ -33,7 +33,8 @@ var shows = function (tvguide_channels) {
       for (epi in res[chan].ProgramSchedules)
       {
         //console.log(res[chan].ProgramSchedules[epi].Title);
-         if (res[chan].ProgramSchedules[epi].Title.indexOf("Paid") > -1)
+        var temp = res[chan].ProgramSchedules[epi].Title.replace(/[^\x20-\x7E]+/g, ''); 
+         if (temp.indexOf("Paid") != -1)
          {
             res[chan].ProgramSchedules.splice(epi,1);
          }

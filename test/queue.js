@@ -1,4 +1,7 @@
-var queue = require('../queue');
+var q = require('../queue');
+var queue = new q();
+var q2 = require('../queue');
+var queue2 = new q2();
 var count = 1;
 var show = [];
 var startTime_val = new Date().getTime()
@@ -7,7 +10,7 @@ var endTime_val_1 = startTime_val + 30 * 1000;
 // 0 element
 if (queue.element() == null){
   console.log("Pass test " + count);
-  count = count + 1; 
+  count = count + 1;
 }
 else
 {
@@ -108,3 +111,7 @@ setTimeout(function(result){
 45 * 1000
 );
 
+console.log(queue.entire());
+console.log("QUEUE2");
+console.log(queue2.entire());
+console.log("QUEUE2");

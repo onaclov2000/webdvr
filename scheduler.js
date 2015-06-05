@@ -4,7 +4,7 @@ var myRootRef = new Firebase(CONFIG.FB_URL);
 var tvguide = require('./tvguide');
 var schedule = require('node-schedule');
 var tuner = require('./tuner');
-var queue = require('./fb_queue');
+var queue = require('./fb_jobs_queue');
 var disk = require('./disk');
 var spawn = require('child_process').spawn;
 
@@ -107,7 +107,7 @@ var start = function(res) {
 
 
 var on_demand = function(res) {
-    // Schedule Record Now. This should be a function? 
+    // Schedule Record Now. This should be a function?
     myRootRef.on('child_changed', function(childSnapshot, prevChildName) {
         
         // code to handle child data changes.

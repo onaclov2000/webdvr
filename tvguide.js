@@ -1,6 +1,6 @@
 // will be a "module" eventually, but this code grabs the json stream
 // This module should ONLY gather raw data from tvguide, and preferrably cache it to about 30 minutes. If you want to translate the data we should have a "filter" file/function that does that.
-var http = require("http");
+var http = require("http");lineup
 var sanitize = require("sanitize-filename");
 var CONFIG = require('./config');
 var Firebase = require('firebase');
@@ -12,7 +12,7 @@ var start = function(res) {
         lineup(CONFIG.UPDATE_FREQUENCY.duration, function(res) {
            console.log("Updated Lineup");
         });
-    }, 21600000);
+    }, CONFIG.UPDATE_FREQUENCY.interval);
     res("Success");
 }
 
@@ -176,5 +176,6 @@ module.exports = {
     start: start,
     lineup: lineup,
     find: find,
-    name: name
+    name: name,
+    get : get
 }
