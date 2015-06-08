@@ -10,8 +10,12 @@ var add = function(self, obj, res) {
                 // push to local queue
                 self.local_queue.push(obj);
                 // expire the queue element (aka remove at predetermined time)
+                /* // Debugging Stuff
                 console.log("timeout");
-                console.log(obj.endTime - obj.startTime);
+                console.log(new Date(temp));
+                console.log(new Date(obj.endTime));
+                console.log((obj.endTime - obj.startTime));
+                */
 				setTimeout(function(val) {
                         var obj;
                         for (i = 0; i <= self.local_queue.length - 1; i++) {
@@ -21,14 +25,15 @@ var add = function(self, obj, res) {
                                 val[1](obj);
                             }
                         }
-                    }, ((obj.endTime - obj.startTime)*1000) + 10, [obj.endTime, res])
+                    }, ((obj.endTime - obj.startTime)) + 10, [obj.endTime, res])
 					
                     // Sort Queue by end time by default.
                 self.local_queue.sort(sort.endTime);
+                return self.local_queue;
             } else {
-                res(obj);
+                return false;
             }
-            return self.local_queue;
+
         };
 var remove = function(self) {
     // remove last item
@@ -40,6 +45,14 @@ var element = function(self) {
     return self.local_queue[self.local_queue.length - 1];
 }
 
+var exists = function(self, id) {
+  for (item in self.local_queue){
+    if (self.local_queue[item].id === id)
+       return true;
+  }
+  return false;
+  
+}
 var queue = function() {
     var self = this;
     self.local_queue = [];
@@ -47,7 +60,8 @@ var queue = function() {
         entire: function(){return entire(self)},
         add: function(obj, res){return add(self, obj, res)},
         remove: function(){return remove(self)},
-        element: function(){return element(self)}
+        element: function(){return element(self)},
+        exists: function(id){return exists(self, id)}
     };
 
     return methods;

@@ -7,13 +7,18 @@ var Firebase = require('firebase');
 var myRootRef = new Firebase(CONFIG.FB_URL);
 var filter = require('./filter');
 var tuner = require('./tuner');
-var start = function(res) {
+var local_cache_lineup = [];
+var start = function(ret) {
     setInterval(function() {
-        lineup(CONFIG.UPDATE_FREQUENCY.duration, function(res) {
+        lineup(CONFIG.UPDATE_FREQUENCY.duration, true, function(res) {
            console.log("Updated Lineup");
         });
     }, CONFIG.UPDATE_FREQUENCY.interval);
-    res("Success");
+    lineup(CONFIG.UPDATE_FREQUENCY.duration, true, function(res) {
+           console.log("Updated Lineup");
+               ret("Success");
+        });
+
 }
 
 
@@ -38,26 +43,33 @@ var provider = function(zip, callback){
                  if temp[element].indexOf("broadcast") > -1){
                     console.log(temp[element]);
                  }
-               } 
+               }
                callback();
             });
-        });  
+        });
 }
 
 */
-var lineup = function(duration, res) {
-    get(Math.floor((new Date).getTime() / 1000), duration, function(result) {
-        tuner.channel(function(chan){
-           var temp1 = filter.channels(chan, result);
-           var temp2 = filter.shows(temp1);
-           myRootRef.update({
-               "tvguide": temp2
+var lineup = function(duration, refresh, res) {
+    if (refresh === true){
+       get(Math.floor(new Date().getTime()) / 1000, duration, function(result) {
+           tuner.channel(function(chan){
+              var temp1 = filter.channels(chan, result);
+              var temp2 = filter.shows(temp1);
+              myRootRef.update({
+                  "tvguide": temp2
+              });
+              console.log('refreshed cache');
+              local_cache_lineup = temp2;
+              res(temp2);
            });
-           res(temp2);
-        });
-    });
-
-    
+       });
+    }
+    else
+    {
+    console.log("returned cache");
+    return res(local_cache_lineup);
+    }
 }
 
 
@@ -148,7 +160,7 @@ var name = function(id, res) {
         result.on('end', function() {
             var result = JSON.parse(str);
             sanatize_name(result["program"], function(locresult) {
-               console.log(locresult); 
+               console.log(locresult);
                res(locresult);
             });
 

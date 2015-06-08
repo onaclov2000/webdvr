@@ -115,3 +115,20 @@ console.log(queue.entire());
 console.log("QUEUE2");
 console.log(queue2.entire());
 console.log("QUEUE2");
+if (queue.exists("id") === true)
+{
+   console.log('exists check passed 1');
+}
+else
+{
+   console.log('exists check failed 1');
+}
+
+if (queue.exists("chicken") === false)
+{
+   console.log('exists check passed 2');
+}
+else
+{
+   console.log('exists check failed 2');
+}
