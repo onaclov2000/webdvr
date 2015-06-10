@@ -5,10 +5,10 @@ var tvguide = require('./tvguide');
 var schedule = require('node-schedule');
 var tuner = require('./tuner');
 var queue = require('./fb_queue');
-var fb_queue = new queue('jobs');
+var job_queue = new queue('jobs');
 var schedule_queue = new queue('scheduled');
 var spawn = require('child_process').spawn;
-
+var disk = require('./disk');
 var job_list = [];
 var scheduled_jobs = [];
 var _recurring = [];
@@ -42,7 +42,7 @@ var old = function(date, length) {
 
 var add_to_schedule_queue = function(jobs, key, res) {
         tvguide.name(jobs.id, function(result) {
-            console.log("Scheduled" + jobs.title + " " + new Date(jobs.date));
+            console.log("Scheduled: " + jobs.title + " " + new Date(jobs.date));
             //console.log(jobs);
             jobs.name = result;
             scheduled(myRootRef, jobs);
@@ -59,6 +59,8 @@ var start = function(res) {
         // Start Jobs monitor, this is the *queue* manager
         console.log("Queue Manager Started");
         myRootRef.child("jobs").on('child_added', function(childSnapshot) {
+            console.log('jobs_child_added');
+            console.log(childSnapshot.val());
             if (childSnapshot.val() !== null) {
                 //console.log("New Job");
                 add_to_schedule_queue(childSnapshot.val(), childSnapshot.key(), function() {}); // Jobs FB
@@ -90,7 +92,13 @@ var start = function(res) {
                        tuner.channel(function(result){
                           console.log(result[_shows[show].channel]);
                           if (result[_shows[show].channel]){
-                             fb_queue.add(_shows[show]);
+                            disk.time(function(disk_time){
+                              console.log("Disk Time: " + disk_time);
+                              console.log(_shows[show]);
+                               if (job_queue.duration() + _shows[show].length/60 < disk_time){
+                                 job_queue.add(_shows[show]);
+                               }
+                             });
                           }
                        });
                     }
@@ -104,11 +112,15 @@ var start = function(res) {
 
 var on_demand = function(res) {
     // Schedule Record Now. This should be a function?
-    myRootRef.on('child_changed', function(childSnapshot, prevChildName) {
-        
+    myRootRef.child('status').on('child_changed', function(childSnapshot, prevChildName) {
+        console.log('child_changed');
+        console.log('on_demand');
         // code to handle child data changes.
         var data = childSnapshot.val();
         var localref = childSnapshot.ref();
+        delete data.commanded;
+        data.endTime = data.date + (data.length * 1000);
+        data.startTime = data.date;
         schedule_on_demand(data, localref, function(res) {
 
         });
@@ -127,8 +139,13 @@ var schedule_on_demand = function(data, localref, res) {
         console.log("New Schedule Added " + data["title"] + " @");
         console.log(date);
         console.log("ON Demand Queued");
-        fb_queue.add(data);
-       
+        disk.time(function(disk_time){
+            console.log("Disk Time: " + disk_time);
+             if (job_queue.duration() + data.length/60 < disk_time){
+               job_queue.add(data);
+             }
+           });
+          
     }
 
 
@@ -137,17 +154,15 @@ var scheduled = function(ref_val, job) {
     job.date = new Date(job.date).getTime();
     job.date = job.date - CONFIG.RECORD_PADDING.before; // Confirm that I need to multiply by 1000, but I'm pretty sure I do
     job.length = job.length + CONFIG.RECORD_PADDING.before + CONFIG.RECORD_PADDING.after;
-    job.tuner_index = tuner.conflict(job.date, job.length, schedule_queue);
+    console.log(schedule_queue);
+    job.tuner_index = tuner.conflict(job.date, job.length, schedule_queue.entire());
     job.endTime = job.date + (job.length);
     /* //Debug Stuff
     console.log("Finding End Time");
     console.log(new Date(job.date));
     console.log(new Date(job.endTime));
     */
-    
-
     if (job.tuner_index > -1) {
-      
         schedule_queue.add(job);
 
         var j = schedule.scheduleJob(new Date(job.date), function(locjob) {
@@ -193,12 +208,16 @@ var recurring = function(res) {
                 console.log("Show " + key.search);
                 tvguide.find(results, key.search, function(_shows) {
                     console.log('Recurring Add Queue');
-                    for (show in _shows){
+                    for (var show in _shows){
                        tuner.channel(function(result){
                           //console.log(result[_shows[show].channel]);
                           if (result[_shows[show].channel]){
-                             //console.log("Recorded Anyways");
-                             fb_queue.add(_shows[show]);
+                             disk.time(function(disk_time){
+                              console.log("Disk Time: " + disk_time);
+                               if (job_queue.duration() + _shows[show].length/60 < disk_time){
+                                 job_queue.add(_shows[show]);
+                               }
+                             });
                           }
                        });
                     }

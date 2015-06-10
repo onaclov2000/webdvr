@@ -4,7 +4,7 @@ var q2 = require('../queue');
 var queue2 = new q2();
 var count = 1;
 var show = [];
-var startTime_val = new Date().getTime()
+var startTime_val = new Date().getTime() + 100;
 var endTime_val_1 = startTime_val + 30 * 1000;
 
 // 0 element
