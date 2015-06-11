@@ -50,6 +50,9 @@ var provider = function(zip, callback){
 }
 
 */
+var cached_lineup = function(){
+     return local_cache_lineup;
+}
 var lineup = function(duration, refresh, res) {
     if (refresh === true){
        get(Math.floor(new Date().getTime()) / 1000, duration, function(result) {
@@ -68,7 +71,7 @@ var lineup = function(duration, refresh, res) {
     else
     {
     console.log("returned cache");
-    return res(local_cache_lineup);
+    res(local_cache_lineup);
     }
 }
 
@@ -94,7 +97,7 @@ var get = function(date, length, callback) {
         });
     }
     // Need to remove duplicates
-var find = function(entire_listing, show, callback) {
+var find = function(entire_listing, show) {
     var res = [];
     console.log("Searching for show" + show);
     for (key in entire_listing) {
@@ -120,7 +123,7 @@ var find = function(entire_listing, show, callback) {
             }
         }
     }
-    callback(res);
+    return res;
 }
 
 //        http://mobilelistings.tvguide.com/Listingsweb/ws/rest/airings/20385.268435456/start/1422793800/duration/20160/search?search=Big%20Bang%20Theory&formattype=json
@@ -189,5 +192,6 @@ module.exports = {
     lineup: lineup,
     find: find,
     name: name,
+    cached_lineup:cached_lineup,
     get : get
 }

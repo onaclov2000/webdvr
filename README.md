@@ -38,7 +38,7 @@ Edit the interfaces file.
     allow-hotplug wlan0
     iface wlan0 inet manual
     wpa-roam /etc/wpa_supplicant/wpa_supplicant.conf
-    iface default inet dhcp 
+    iface default inet dhcp
 
 The main difference here is that I set the eth0 to static and gave it a link local address, perhaps another address might work, but this worked and I'm sticking with it.
    
@@ -69,7 +69,7 @@ Next:
 
 You'll have to choose a firebase reference, I picked a project and used /dvr as the endpoint.
 
-Next: 
+Next:
 Make sure to update controller.js to contain a path to your firebase reference.
 
 Place controller.js and index.html into your web hosting location.
@@ -78,9 +78,9 @@ Next:
 
 Update config.js to point to the same firebase reference as your angularjs app.
 
-Next: 
+Next:
 
-Ensure you install the HDHomerun command line tools. 
+Ensure you install the HDHomerun command line tools.
 
 Next:
 Run the command otherwise it won't work
@@ -109,20 +109,16 @@ TODO LIST (Make suggestions or pull requests please!)
          1b. If only one exists, check the tuner identifier, if it's 0 return 1
          1b. If more than one exists, set fb/conflict list
 
-4. Ensure Naming makes sense for all that is recorded. <-- I *think* this one is sufficient I am using a package for naming to local file structures.
-5. Upgrade to using HDHomerun nodejs package (currently using shell script with hdhomerun_config installed).
-6. Store off recording history (for failure conditions). <-- This is the jobs queue
-7. Implement Record Now (and start recording if no conflicts exist, rather than in the past).
-8. Enable Complete Series recording. <-- This may be done by the "recurring" record.
-9. Enable New episodes recording I'm thinking program ID lookup based, should we use tvguide, or another service?
-10. Replace boring text with pictures (a la netflix style).
-11. Combine config.js and angularjs's firebase reference into one file, so you copy/paste the same file in two places.
-12. Figure out "newness" of episode, I *think* AiringAttrib 44 means new, but there are others (I'm certain of that), not sure how to tell.
-13. For the Web Site, display a footer that you can click on that will slide up and show all recordings, while closed it'll show the closest upcoming recording though. <-- Kinda made a dropdown, it's not great but it's there
-14. Remove duplicate id's from tvguide.show() function return. Right now I see a lot of dupes <-- filter functions
-15. Calculate size remaining, <-- Done I think 
-16. If size remaining and scheduled overlap then send email possibly (using sendgrid?)
-17. Figure out commercial skipping (perhaps this would be useful)
+4. Upgrade to using HDHomerun nodejs package (currently using shell script with hdhomerun_config installed).
+5. Implement Record Now (and start recording if no conflicts exist, rather than in the past).
+6. Enable New episodes recording I'm thinking program ID lookup based, should we use tvguide, or another service?
+7. Replace boring text with pictures (a la netflix style).
+8. Combine config.js and angularjs's firebase reference into one file, so you copy/paste the same file in two places.
+9. Figure out "newness" of episode, I *think* AiringAttrib 44 means new, but there are others (I'm certain of that), not sure how to tell.
+10. For the Web Site, display a footer that you can click on that will slide up and show all recordings, while closed it'll show the closest upcoming recording though. <-- Kinda made a dropdown, it's not great but it's there
+11. If size remaining and scheduled overlap then send email possibly (using sendgrid?)
+12. Figure out commercial skipping (perhaps this would be useful)
+13. Update jobs_queue with firebase existing jobs when starting up (otherwise they get out of sync).
 
 https://github.com/MythTV/mythtv/tree/master/mythtv/programs/mythcommflag
 

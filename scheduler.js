@@ -69,11 +69,23 @@ var start = function(res) {
         });
         console.log("Recurring Manager Started");
         // Start Recurring monitor, this is the repeated *search* manager
-        recurring(function(result) {
-           }); // Recurring
-        console.log("On Demand Manager Started");
-        // Start On Demand monitor
+        
+        //I'm not sure if this will work "correctly" but basically go get all the recurring elements, then go through them with the existing lineups etc.
+        myRootRef.child("recurring").on('value', function(childSnapshot) {
+          console.log("Initialize Recurring List");
+          childSnapshot.forEach(function(dataSnapshot) {
+              var key = dataSnapshot.val();
+  
+              if (_recurring.indexOf(key.search) == -1) {
+                  _recurring.push(key.search);
+              }
+          });
+           recurring();
+        });
+            
 
+        // Start On Demand monitor
+        console.log("On Demand Manager Started");
         on_demand(function() {
             res("Success");
         }); // On Demand
@@ -82,29 +94,8 @@ var start = function(res) {
 
 
     myRootRef.child("tvguide").on('child_changed', function(childSnapshot, previousChanged) {
-        for (element in _recurring) {
-            console.log(_recurring[element]);
-            tvguide.lineup(CONFIG.UPDATE_FREQUENCY.duration, false, function(results) {
-
-                tvguide.find(results, _recurring[element], function(_shows) {
-                    console.log("SHOWS");
-                    for (show in _shows){
-                       tuner.channel(function(result){
-                          console.log(result[_shows[show].channel]);
-                          if (result[_shows[show].channel]){
-                            disk.time(function(disk_time){
-                              console.log("Disk Time: " + disk_time);
-                              console.log(_shows[show]);
-                               if (job_queue.duration() + _shows[show].length/60 < disk_time){
-                                 job_queue.add(_shows[show]);
-                               }
-                             });
-                          }
-                       });
-                    }
-                });
-            });
-        }
+        console.log('TV Guide has changed, checking for recurring programs to record.')
+        recurring();
     });
 }
 
@@ -112,15 +103,16 @@ var start = function(res) {
 
 var on_demand = function(res) {
     // Schedule Record Now. This should be a function?
-    myRootRef.child('status').on('child_changed', function(childSnapshot, prevChildName) {
+    myRootRef.on('child_changed', function(childSnapshot, prevChildName) {
         console.log('child_changed');
         console.log('on_demand');
         // code to handle child data changes.
         var data = childSnapshot.val();
         var localref = childSnapshot.ref();
-        delete data.commanded;
+        
         data.endTime = data.date + (data.length * 1000);
         data.startTime = data.date;
+        console.log(data);
         schedule_on_demand(data, localref, function(res) {
 
         });
@@ -134,6 +126,7 @@ var schedule_on_demand = function(data, localref, res) {
         localref.update({
             "commanded": "waiting"
         });
+        delete data.commanded;
         var date = new Date(data["date"]);
 
         console.log("New Schedule Added " + data["title"] + " @");
@@ -194,39 +187,32 @@ var create_scheduled_recording = function(job) {
 }
 
 
-
-var recurring = function(res) {
-    myRootRef.child("recurring").on('value', function(childSnapshot) {
-        console.log("Recurring");
-        childSnapshot.forEach(function(dataSnapshot) {
-            var key = dataSnapshot.val();
-
-            if (_recurring.indexOf(key.search) == -1) {
-                _recurring.push(key.search);
-            }
-            tvguide.lineup(CONFIG.UPDATE_FREQUENCY.duration, false, function(results) {
-                console.log("Show " + key.search);
-                tvguide.find(results, key.search, function(_shows) {
-                    console.log('Recurring Add Queue');
-                    for (var show in _shows){
-                       tuner.channel(function(result){
-                          //console.log(result[_shows[show].channel]);
-                          if (result[_shows[show].channel]){
-                             disk.time(function(disk_time){
-                              console.log("Disk Time: " + disk_time);
-                               if (job_queue.duration() + _shows[show].length/60 < disk_time){
-                                 job_queue.add(_shows[show]);
-                               }
-                             });
-                          }
-                       });
+// Recurring has been simplified, and "cache" functions for a few of these are now in use.
+// Are they the right solution? I think so, for example, the "channel" from the tuner will only be setup the first time you start the device application
+// the first time we run "recurring" the lineup has been retrieved, the next time we only update when the tvguide FB data changes, which implies
+// that the data is static once again, no point in doing anything.
+var recurring = function() {
+       console.log("Time to find any recurring shows and add them to our job queue.")
+        var channel = tuner.cached_channel();
+        var lineup  = tvguide.cached_lineup();
+        for (element in _recurring) {
+            console.log(_recurring[element]);
+            var shows = tvguide.find(lineup, _recurring[element]);
+            console.log("SHOWS");
+            for (show in shows){
+               console.log(channel[shows[show].channel]);
+               if (channel[shows[show].channel]){
+                 disk.time(function(disk_time){
+                   console.log("Disk Time: " + disk_time);
+                   console.log(shows[show]);
+                    if (job_queue.duration() + shows[show].length/60 < disk_time){
+                      job_queue.add(shows[show]);
                     }
-                });
-            });
-        });
-        res("SUCCESS");
-    });
-
+                  });
+               }
+            }
+        }
+    return "Success";
 }
 
 

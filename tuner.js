@@ -63,6 +63,10 @@ var count = function(return_value) {
         return_value(_count);
     }
 }
+var cached_channel = function()
+{
+  return _channel;
+  }
 var channel = function(return_value) {
     if (_channel == "") {
         myRootRef.child("channel_data").once('value', function(childSnapshot) {
@@ -139,7 +143,7 @@ var conflict = function(date, duration, scheduled_jobs) {
         //1. Look through all scheduled tasks and look for a date that is during the date time + duration (overlapping).
         //1a. If none exists, then return 0
         //1b. If only one exists, check the tuner identifier, if it's 0 return 1
-        //1b. If more than one exists, set fb/conflict list         
+        //1b. If more than one exists, set fb/conflict list
         for (var key in scheduled_jobs) {
             // If the scheduled job is before this job
             if (conflict(scheduled_jobs[key]["date"], scheduled_jobs[key]["length"], date, duration)) {
@@ -163,5 +167,6 @@ module.exports = {
     channel: channel,
     tune: tune,
     start: start,
+    cached_channel: cached_channel,
     conflict : conflict
 }
