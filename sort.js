@@ -1,4 +1,6 @@
-var endTime = function(a, b) {
+/*jslint node: true */
+"use strict";
+var endTime = function (a, b) {
     if (a.endTime < b.endTime) {
         return -1;
     }
@@ -6,8 +8,8 @@ var endTime = function(a, b) {
         return 1;
     }
     return 0;
-}
+};
 
 module.exports = {
-   endTime : endTime
-}
+    endTime : endTime
+};

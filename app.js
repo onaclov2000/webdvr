@@ -1,3 +1,5 @@
+/* jslint node: true */
+"use strict";
 var FB_URL = require('./config').FB_URL;
 var Firebase = require('firebase');
 var os = require('os');
@@ -20,7 +22,7 @@ process.stdin.resume(); //so the program will not close instantly
 process.on('SIGINT', dvr.cleanup());
 
 //catches uncaught exceptions
-// Here's where I'm torn. I need to call dvr.cleanup as well, not sure if this will work 
+// Here's where I'm torn. I need to call dvr.cleanup as well, not sure if this will work
 // if I add it.
 //process.on('uncaughtException', dvr.cleanup_error(err));
 process.on('uncaughtException', function(err) {
