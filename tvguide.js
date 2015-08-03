@@ -107,13 +107,13 @@ var cached_lineup = function () {
 var find = function (entire_listing, show) {
     var res = [];
     console.log("Searching for show" + show);
-    for (key in entire_listing) {
+    for (var key in entire_listing) {
         // grab the index.
-        for (item in entire_listing[key]["ProgramSchedules"]) {
+        for (var item in entire_listing[key]["ProgramSchedules"]) {
             if (entire_listing[key]["ProgramSchedules"][item]["Title"].indexOf(show) > -1) {
                 console.log(entire_listing[key]["ProgramSchedules"][item]["Title"]);
-                startTime = entire_listing[key]["ProgramSchedules"][item]["StartTime"];
-                endTime = entire_listing[key]["ProgramSchedules"][item]["EndTime"];
+                var startTime = entire_listing[key]["ProgramSchedules"][item]["StartTime"];
+                var endTime = entire_listing[key]["ProgramSchedules"][item]["EndTime"];
                 var scheduledDate = new Date((startTime - 120) * 1000);
                 // always record 2 minutes before and 2 minutes after approx
                 var duration = (endTime - startTime) + 240;
