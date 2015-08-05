@@ -194,11 +194,22 @@ var sanatize_name = function (program, res) {
     }
 };
 
+// prints all the data in a lineup, previously the program schedules was just an array of objects when printed.
+var print = function() {
+  for (element in cached_lineup){
+    console.log(cached_lineup[element].Channel);
+    for (show in cached_lineup[element].ProgramSchedules){
+       console.log(cached_lineup[element].ProgramSchedules[show]);
+    }
+  }
+}
+
 module.exports = {
     start: start,
     lineup: lineup,
     find: find,
     name: name,
     cached_lineup: cached_lineup,
+    print : print,
     get: get
 }

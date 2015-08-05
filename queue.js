@@ -51,13 +51,13 @@ var element = function (self) {
 var exists = function (self, id) {
     var item = "";
     for (item in self.local_queue) {
-        console.log(self.local_queue[item].id);
-        console.log(id);
+        console.log("Current ID: " + self.local_queue[item].id + " Looking for ID: " + id);
         if (self.local_queue[item].id === id) {
             console.log(new Date() + ": Duplicate Found");
             return true;
         }
     }
+    console.log({fb_queue_queue : self.local_queue})
     return false;
 
 };

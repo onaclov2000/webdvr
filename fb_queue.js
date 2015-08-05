@@ -12,11 +12,11 @@ var add = function (self, obj) {
         obj.key = key.key();
         self.queue.add(obj, function (self, object) {
             // The timer has gone off, so we should remove the element from firebase
-            console.log("removing" + object.title);
+            console.log("fb_queue.add: removing: " + object.title + "name: " + object.name + " id:" + object.id);
             console.log(new Date(obj.endTime));
             // update the disk space... I mean... the darn thing should be done recording.
             disk.time(function (res) {
-                console.log("updated time remaining, because why not");
+                console.log("fb_queue.add: updated time remaining, because why not");
                 myRootRef.update({
                     "time_remaining": res / 60
                 });
@@ -34,7 +34,7 @@ var entire = function (self) {
 
 var duration = function (self) {
     var duration_length = self.queue.duration();
-    console.log("Duration in minutes: " + duration_length);
+    console.log("fb_queue.duration: Duration in minutes: " + duration_length);
     return duration_length;
 };
 

@@ -145,11 +145,29 @@ var tune = function (tuner_index, tune_channel, tune_program) {
 
 };
 
+function conflict(time1, duration1, time2, duration2) {
+    if ((time1 < time2) && (time2 < time1 + duration1)) {
+        return true;
+    }
+    if ((time2 < time1) && (time1 < time2 + duration2)) {
+        // so we've found a conflict
+        return true;
+    }
+    if (time1 === time2) {
+        return true;
+    }
+
+    return false;
+}
+
 
 // The scheduler should have a "conflict resolution"
-var conflict = function (date, duration, scheduled_jobs) {
+var get = function (date, duration, scheduled_jobs) {
     var return_val = 0; // always try to return 0 by default
-    var number_of_tuners = 1; // really base 0, so 2 tuners should be determined at initialization, but for now this will work.
+    var number_of_tuners = 0; // Assume only 1 tuner at a minimum
+    if (pkg_count !== -1){
+       number_of_tuners = pkg_count; // But if our tuner count is valid, well wemay have more tuners available so get that value :)
+    }
     if (scheduled_jobs != null) {
         //1. Look through all scheduled tasks and look for a date that is during the date time + duration (overlapping).
         //1a. If none exists, then return 0
@@ -171,7 +189,6 @@ var conflict = function (date, duration, scheduled_jobs) {
     return return_val;
 };
 
-
 var start = function (result) {
     name(function (res) {
         count(function (res) {
@@ -190,5 +207,5 @@ module.exports = {
     tune: tune,
     start: start,
     cached_channel: cached_channel,
-    conflict: conflict
+    get : get
 };

@@ -50,7 +50,7 @@ var create_scheduled_recording = function (job) {
     console.log(job.channel);
     var record = spawn('./record.sh', [job.name, job.station, job.program, job.length, job.tuner_index]);
     var temp_data = "";
-    record.on('data', function (data) {
+    record.stdout.on('data', function (data) {
         temp_data += data;
     });
 
@@ -64,8 +64,9 @@ var scheduled = function (job) {
     job.date = job.date - CONFIG.RECORD_PADDING.before; // Confirm that I need to multiply by 1000, but I'm pretty sure I do
     job.length = job.length + CONFIG.RECORD_PADDING.before + CONFIG.RECORD_PADDING.after;
     console.log(schedule_queue);
-    job.tuner_index = tuner.conflict(job.date, job.length, schedule_queue.entire());
+    job.tuner_index = tuner.get(job.date, job.length, schedule_queue.entire());
     job.endTime = job.date + (job.length);
+    // If the returned tuner index is -1 then well we don't have an available tuner.
     if (job.tuner_index > -1) {
         schedule_queue.add(job);
 
@@ -107,6 +108,7 @@ var start = function (res) {
 
             });
 
+            // we want to capture all the existing jobs, and convert them to new jobs
             var existing_jobs = childSnapshot.val();
             var existing_job = "";
             var obj = "";
@@ -119,47 +121,24 @@ var start = function (res) {
                 // remove old key (this way we don't have duplicates)
                 myRootRef.child("jobs").child(obj.key).remove();
             }
-
-
+            
             console.log("Recurring Manager Started");
             // Start Recurring monitor, this is the repeated *search* manager
             recurring.start(function () {
+                console.log("Recurring Manager Start Function Called");
                 res("Success");
             }); // On Demand
             // Start On Demand monitor
             console.log("On Demand Manager Started");
             on_demand.start(function () {
+                console.log("On Demand Start Function Called");
                 res("Success");
             }); // On Demand
         });
     }); // Schedule Removed
-
-
-
 };
 
-
-
-
-
-
-// Scheduler file.
-function conflict(time1, duration1, time2, duration2) {
-    if ((time1 < time2) && (time2 < time1 + duration1)) {
-        return true;
-    }
-    if ((time2 < time1) && (time1 < time2 + duration2)) {
-        // so we've found a conflict
-        return true;
-    }
-    if (time1 === time2) {
-        return true;
-    }
-
-    return false;
-}
-
 module.exports = {
-    start: start,
-    create_scheduled_recording: create_scheduled_recording
+    start: start//,
+    //create_scheduled_recording: create_scheduled_recording
 };
