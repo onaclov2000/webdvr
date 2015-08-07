@@ -26,6 +26,7 @@ var schedule = function () {
         var shows;
         var show;
         for (element in recurring) {
+            console.log("recurring Element Value:");
             console.log(recurring[element]);
             shows = tvguide.find(lineup, recurring[element]);
             console.log("SHOWS");
@@ -41,7 +42,11 @@ var schedule = function () {
                 console.log("Disk Time: " + disk_time);
                 console.log(shows[show]);
                 if (job_queue.duration() + shows[show].length / 60 < disk_time) {
-                    job_queue.add(shows[show]);
+                  tvguide.name(shows[show].id, function (job, result) {
+                      job.name = result;
+                      job_queue.add(job);
+                }.bind(null, shows[show]));
+//                    job_queue.add(shows[show]);
                 }
             }
 
@@ -49,7 +54,7 @@ var schedule = function () {
     });
     return "Success";
 };
-
+var updating = false;
 var start = function(result){
   //I'm not sure if this will work "correctly" but basically go get all the recurring elements, then go through them with the existing lineups etc.
   myRootRef.child("recurring").on('value', function (childSnapshot) {
@@ -64,10 +69,11 @@ var start = function(result){
     schedule();
   });
   
-  myRootRef.child("tvguide").on('child_changed', function () {
+  myRootRef.child("tvguide").on('value', function () {
     console.log('TV Guide has changed, checking for recurring programs to record.');
     child_changed_occurances = child_changed_occurances + 1;
     console.log("This has been called: " + child_changed_occurances);
+    console.log(new Date());
     schedule();
   });
   result("Success");

@@ -3,7 +3,9 @@ var Firebase = require('firebase');
 var myRootRef = new Firebase(CONFIG.FB_URL);
 var tuner = require('./tuner');
 var tvguide = require('./tvguide');
-
+var Queue = require('./fb_queue');
+var disk = require('./disk');
+var job_queue = new Queue('jobs');
 var schedule_on_demand = function (data, localref, res) {
   
   localref.update({

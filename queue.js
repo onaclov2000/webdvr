@@ -57,7 +57,7 @@ var exists = function (self, id) {
             return true;
         }
     }
-    console.log({fb_queue_queue : self.local_queue})
+    console.log({queue : self.local_queue})
     return false;
 
 };

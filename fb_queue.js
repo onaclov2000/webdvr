@@ -12,7 +12,7 @@ var add = function (self, obj) {
         obj.key = key.key();
         self.queue.add(obj, function (self, object) {
             // The timer has gone off, so we should remove the element from firebase
-            console.log("fb_queue.add: removing: " + object.title + "name: " + object.name + " id:" + object.id);
+            console.log("fb_queue." + self.child + ".add: removing: " + object.title + "name: " + object.name + " id:" + object.id);
             console.log(new Date(obj.endTime));
             // update the disk space... I mean... the darn thing should be done recording.
             disk.time(function (res) {
@@ -41,6 +41,7 @@ var duration = function (self) {
 var Fb_queue = function (child) {
     var self = this;
     self.child = child;
+    console.log(self.child);
     self.queue = new Queue();
     var methods = {
         add: function (obj) {

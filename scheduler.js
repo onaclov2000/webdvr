@@ -69,7 +69,6 @@ var scheduled = function (job) {
     // If the returned tuner index is -1 then well we don't have an available tuner.
     if (job.tuner_index > -1) {
         schedule_queue.add(job);
-
         schedule.scheduleJob(new Date(job.date), function (locjob) {
             console.log("Create Scheduled Recording");
             create_scheduled_recording(locjob);
@@ -78,17 +77,6 @@ var scheduled = function (job) {
         // push to conflicts firebase location
         console.log("Too Many Conflicts");
     }
-};
-
-// we used to pass in the key, but I'm not sure why anymore
-var add_to_schedule_queue = function (jobs) {
-    tvguide.name(jobs.id, function (result) {
-        console.log("Scheduled: " + jobs.title + " " + new Date(jobs.date));
-        //console.log(jobs);
-        jobs.name = result;
-        scheduled(jobs);
-    });
-
 };
 
 
@@ -103,7 +91,7 @@ var start = function (res) {
                 console.log(childSnapshot.val());
                 if (childSnapshot.val() !== null) {
                     //console.log("New Job");
-                    add_to_schedule_queue(childSnapshot.val()); // Jobs FB
+                    scheduled(childSnapshot.val());
                 }
 
             });
@@ -116,10 +104,13 @@ var start = function (res) {
                 console.log(existing_jobs[existing_job]);
                 obj = "";
                 obj = existing_jobs[existing_job];
-                // add and get a new key (managed inside fb_queue for new element)
-                job_queue.add(obj);
-                // remove old key (this way we don't have duplicates)
-                myRootRef.child("jobs").child(obj.key).remove();
+                   // add and get a new key (managed inside fb_queue for new element)
+                tvguide.name(obj.id, function (job, result) {
+                      job.name = result;
+                      job_queue.add(job);
+                      // remove old key (this way we don't have duplicates)
+                      myRootRef.child("jobs").child(job.key).remove();
+                }.bind(null, obj));
             }
             
             console.log("Recurring Manager Started");

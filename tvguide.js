@@ -169,6 +169,7 @@ var name = function (id, res) {
 
         result.on('end', function () {
             var result = JSON.parse(str);
+            console.log({program : result["program"]});
             sanatize_name(result["program"], function (locresult) {
                 console.log(locresult);
                 res(locresult);
