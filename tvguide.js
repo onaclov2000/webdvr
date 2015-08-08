@@ -114,16 +114,13 @@ var find = function (entire_listing, show) {
                 console.log(entire_listing[key]["ProgramSchedules"][item]["Title"]);
                 var startTime = entire_listing[key]["ProgramSchedules"][item]["StartTime"];
                 var endTime = entire_listing[key]["ProgramSchedules"][item]["EndTime"];
-                var scheduledDate = new Date((startTime - 120) * 1000);
-                // always record 2 minutes before and 2 minutes after approx
-                var duration = (endTime - startTime) + 240;
                 res.push({
                     // Firebase Workaround for not allowed to have .'s in paths
                     channel: entire_listing[key]["Channel"]["Number"].replace('.', '-'),
-                    date: scheduledDate.getTime(),
-                    length: duration,
-                    startTime: startTime * 1000,
-                    endTime: endTime * 1000,
+                    date: startTime,
+                    length: (endTime - startTime),
+                    startTime: startTime,
+                    endTime: endTime,
                     id: entire_listing[key]["ProgramSchedules"][item]["ProgramId"],
                     title: entire_listing[key]["ProgramSchedules"][item]["Title"]
                 });
